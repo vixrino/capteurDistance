@@ -1,0 +1,30 @@
+# Dépendances
+node_modules/
+*/node_modules/
+
+# Build
+dist/
+*/dist/
+build/
+*/build/
+
+# Env — NE JAMAIS committer les secrets
+.env
+backend/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Cache
+.cache/
+.parcel-cache/
+*.tsbuildinfo

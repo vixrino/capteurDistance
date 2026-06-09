@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --paper: #f3efe6;
+    --paper-raised: #faf7f0;
+    --ink: #211f1b;
+    --ink-muted: #76705f;
+    --ink-faint: #9c9685;
+    --line: #d8d1c0;
+    --clay: #b24a2e;
+  }
+
+  html {
+    font-family: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    background-color: var(--paper);
+    color: var(--ink);
+  }
+
+  body {
+    background-color: var(--paper);
+  }
+
+  ::selection {
+    background: rgba(178, 74, 46, 0.16);
+    color: var(--ink);
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cfc7b4; }
+  ::-webkit-scrollbar-thumb:hover { background: #bcb29b; }
+
+  h1, h2, h3 {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+  }
+}
+
+@layer components {
+  /* ── Surfaces ── */
+  .card {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+  }
+
+  .card-hover {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    transition: border-color 0.3s ease, transform 0.3s ease;
+  }
+  .card-hover:hover {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+  }
+
+  /* ── Eyebrow / section label ── */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.5rem;
+    height: 1px;
+    background: var(--clay);
+  }
+
+  /* ── Buttons ── */
+  .btn-ink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.6rem;
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--paper);
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    transition: background 0.25s ease, color 0.25s ease;
+    white-space: nowrap;
+  }
+  .btn-ink:hover { background: var(--clay); border-color: var(--clay); }
+  .btn-ink:disabled { opacity: 0.4; pointer-events: none; }
+
+  .btn-line {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.6rem;
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--ink);
+    transition: background 0.25s ease, color 0.25s ease;
+    white-space: nowrap;
+  }
+  .btn-line:hover { background: var(--ink); color: var(--paper); }
+
+  /* ── Tag / badge ── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .tag-easy   { color: #4f6a52; }
+  .tag-medium { color: #a8812e; }
+  .tag-hard   { color: #b24a2e; }
+
+  /* ── Field ── */
+  .field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 0.5rem 0;
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: 1rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.25s ease;
+    border-radius: 0;
+  }
+  .field::placeholder { color: var(--ink-faint); }
+  .field:focus { border-bottom-color: var(--clay); }
+}
+
+@layer utilities {
+  .rule { border-color: var(--line); }
+
+  .num {
+    font-family: "Fraunces", Georgia, serif;
+    font-variant-numeric: tabular-nums;
+    font-optical-sizing: auto;
+  }
+
+  /* faint engraved grid, barely visible */
+  .bg-engrave {
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.4;
+  }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@keyframes draw-stroke {
+  from { stroke-dashoffset: var(--dash, 1000); }
+  to   { stroke-dashoffset: 0; }
+}
