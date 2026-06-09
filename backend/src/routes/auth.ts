@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import pool from "../db/connection";
+import privatePool from "../db/connectionPrivate";
 
 const router = Router();
 
@@ -32,8 +32,8 @@ router.post("/register", async (req: Request, res: Response) => {
 
   try {
     const hash = await bcrypt.hash(password, 10);
-    const [result] = await pool.execute(
-      "INSERT INTO distance_users (username, email, password_hash) VALUES (?, ?, ?)",
+    const [result] = await privatePool.execute(
+      "INSERT INTO utilisateurs (username, email, password_hash) VALUES (?, ?, ?)",
       [username, email, hash]
     );
     const insertId = (result as { insertId: number }).insertId;
@@ -70,8 +70,8 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 
   try {
-    const [rows] = await pool.execute(
-      "SELECT id, username, email, password_hash FROM distance_users WHERE email = ?",
+    const [rows] = await privatePool.execute(
+      "SELECT id, username, email, password_hash FROM utilisateurs WHERE email = ?",
       [email]
     );
     const users = rows as { id: number; username: string; email: string; password_hash: string }[];
