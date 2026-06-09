@@ -1,29 +1,33 @@
+import mysql from "mysql2/promise";
 import fs from "fs";
 import path from "path";
-import pool from "./connection";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 async function initDatabase() {
+  // Connexion sans sélectionner la base (pour pouvoir faire CREATE DATABASE)
+  const conn = await mysql.createConnection({
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT) || 3306,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    multipleStatements: true,
+  });
+
   const sqlPath = path.join(__dirname, "../../../db/init.sql");
   const sql = fs.readFileSync(sqlPath, "utf-8");
 
-  const statements = sql
-    .split(";")
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-
-  const conn = await pool.getConnection();
   try {
-    for (const stmt of statements) {
-      await conn.execute(stmt);
-    }
-    console.log("✅  Tables distance_* créées avec succès.");
+    await conn.query(sql);
+    console.log("✅  Base 'capteur_distance' et table 'mesures' créées.");
   } finally {
-    conn.release();
+    await conn.end();
   }
   process.exit(0);
 }
 
 initDatabase().catch((err) => {
-  console.error("❌  Erreur init BDD :", err);
+  console.error("❌  Erreur init BDD :", err.message);
   process.exit(1);
 });
