@@ -117,3 +117,10 @@ distancecapteurdistance/
 └── db/
     └── init.sql
 ```
+
+
+git clone https://github.com/vixrino/capteurDistance.git
+cd capteurDistance
+cp backend/.env.example backend/.env  # puis remplir le vrai mot de passe
+cd backend && npm install && npm run dev
+cd ../frontend && npm install && npm run dev
