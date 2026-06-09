@@ -5,6 +5,14 @@ import pool from "../db/connection";
 
 const router = Router();
 
+function createToken(userId: number, username: string) {
+  return jwt.sign(
+    { userId, username },
+    process.env.JWT_SECRET!,
+    { expiresIn: (process.env.JWT_EXPIRES_IN || "7d") as `${number}${"s"|"m"|"h"|"d"}` }
+  );
+}
+
 /**
  * POST /api/auth/register
  * Body: { username, email, password }
@@ -15,6 +23,13 @@ router.post("/register", async (req: Request, res: Response) => {
     res.status(400).json({ error: "Champs manquants" });
     return;
   }
+
+  if (process.env.DEMO_MODE === "true") {
+    const user = { id: 1, username, email };
+    res.status(201).json({ token: createToken(user.id, user.username), user, demo: true });
+    return;
+  }
+
   try {
     const hash = await bcrypt.hash(password, 10);
     const [result] = await pool.execute(
@@ -22,12 +37,7 @@ router.post("/register", async (req: Request, res: Response) => {
       [username, email, hash]
     );
     const insertId = (result as { insertId: number }).insertId;
-    const token = jwt.sign(
-      { userId: insertId, username },
-      process.env.JWT_SECRET!,
-      { expiresIn: (process.env.JWT_EXPIRES_IN || "7d") as `${number}${"s"|"m"|"h"|"d"}` }
-    );
-    res.status(201).json({ token, user: { id: insertId, username, email } });
+    res.status(201).json({ token: createToken(insertId, username), user: { id: insertId, username, email } });
   } catch (err: unknown) {
     const e = err as { code?: string; message?: string };
     if (e.code === "ER_DUP_ENTRY") {
@@ -51,6 +61,14 @@ router.post("/login", async (req: Request, res: Response) => {
     res.status(400).json({ error: "Champs manquants" });
     return;
   }
+
+  if (process.env.DEMO_MODE === "true") {
+    const username = email.split("@")[0] || "demo";
+    const user = { id: 1, username, email };
+    res.json({ token: createToken(user.id, user.username), user, demo: true });
+    return;
+  }
+
   try {
     const [rows] = await pool.execute(
       "SELECT id, username, email, password_hash FROM distance_users WHERE email = ?",
@@ -67,12 +85,7 @@ router.post("/login", async (req: Request, res: Response) => {
       res.status(401).json({ error: "Email ou mot de passe incorrect" });
       return;
     }
-    const token = jwt.sign(
-      { userId: user.id, username: user.username },
-      process.env.JWT_SECRET!,
-      { expiresIn: (process.env.JWT_EXPIRES_IN || "7d") as `${number}${"s"|"m"|"h"|"d"}` }
-    );
-    res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
+    res.json({ token: createToken(user.id, user.username), user: { id: user.id, username: user.username, email: user.email } });
   } catch (err: unknown) {
     const e = err as { code?: string; message?: string };
     console.error("Erreur login BDD:", e.message);

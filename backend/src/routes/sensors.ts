@@ -5,14 +5,38 @@ import { AuthRequest } from "../types";
 
 const router = Router();
 
+const demoSensor = {
+  id: 1,
+  name: "Capteur démo",
+  location: "Simulation locale",
+  unit: "cm",
+  min_range: 2,
+  max_range: 400,
+  active: true,
+};
+
 /** GET /api/sensors — liste tous les capteurs */
 router.get("/", async (_req, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json([demoSensor]);
+    return;
+  }
+
   const [rows] = await pool.execute("SELECT * FROM distance_sensors ORDER BY id");
   res.json(rows);
 });
 
 /** GET /api/sensors/:id — détail d'un capteur */
 router.get("/:id", async (req, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    if (Number(req.params.id) !== demoSensor.id) {
+      res.status(404).json({ error: "Capteur introuvable" });
+      return;
+    }
+    res.json(demoSensor);
+    return;
+  }
+
   const [rows] = await pool.execute(
     "SELECT * FROM distance_sensors WHERE id = ?",
     [req.params.id]
