@@ -5,8 +5,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+async function runSqlFile(conn: mysql.Connection, filePath: string, label: string) {
+  const sql = fs.readFileSync(filePath, "utf-8");
+  await conn.query(sql);
+  console.log(`✅  ${label}`);
+}
+
 async function initDatabase() {
-  // Connexion sans sélectionner la base (pour pouvoir faire CREATE DATABASE)
+  // Connexion sans sélectionner de base (pour CREATE DATABASE)
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT) || 3306,
@@ -15,15 +21,16 @@ async function initDatabase() {
     multipleStatements: true,
   });
 
-  const sqlPath = path.join(__dirname, "../../../db/init.sql");
-  const sql = fs.readFileSync(sqlPath, "utf-8");
+  const publicSql  = path.join(__dirname, "../../../db/init.sql");
+  const privateSql = path.join(__dirname, "../../../db/init_private.sql");
 
   try {
-    await conn.query(sql);
-    console.log("✅  Base 'capteur_distance' et table 'mesures' créées.");
+    await runSqlFile(conn, publicSql,  "Base publique  'capteur_distance'  → table mesures créée.");
+    await runSqlFile(conn, privateSql, "Base privée    'capteur_private'   → tables utilisateurs + scores créées.");
   } finally {
     await conn.end();
   }
+
   process.exit(0);
 }
 
