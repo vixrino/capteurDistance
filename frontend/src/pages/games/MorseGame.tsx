@@ -11,9 +11,10 @@ const MORSE_TABLE: Record<string, string> = {
 
 const WORDS = ["ISEP", "TIVA", "LASER", "CODE", "SIGNAL", "ONDE", "RADAR"];
 
-const NEAR = 30;   // < 30 cm = point
-const FAR = 80;    // 30–80 cm = tiret
-const SPACE = 150; // > 150 cm = espace (fin de lettre)
+// Bandes calées sur la plage réelle du capteur (10–80 cm) :
+const NEAR = 30;   // 10–30 cm  = point
+const FAR = 60;    // 30–60 cm  = tiret
+const SPACE = 60;  // > 60 cm   = espace (fin de lettre)
 
 function distToSymbol(d: number): "." | "-" | " " | null {
   if (d < NEAR) return ".";
@@ -81,8 +82,8 @@ export default function MorseGame() {
   async function saveScore() {
     if (!playerName.trim()) return;
     await api.post("/games/scores", {
-      game_id: "morse",
-      player_name: playerName.trim(),
+      jeu: "morse",
+      joueur: playerName.trim(),
       score,
       details: { word, typed, decoded },
     });

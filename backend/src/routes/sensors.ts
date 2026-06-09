@@ -1,77 +1,32 @@
 import { Router, Response } from "express";
-import pool from "../db/connection";
-import { authenticate } from "../middleware/authMiddleware";
-import { AuthRequest } from "../types";
 
 const router = Router();
 
-const demoSensor = {
+// Architecture mono-capteur : la base ne contient qu'une table `mesures`
+// (pas de table `distance_sensors`). On expose donc un capteur statique unique,
+// que le mode démo soit actif ou non. Le frontend (Dashboard) attend cette forme.
+const staticSensor = {
   id: 1,
-  name: "Capteur démo",
-  location: "Simulation locale",
+  name: "Sharp GP2Y0A21",
+  location: "TIVA C — PD3",
   unit: "cm",
-  min_range: 2,
-  max_range: 400,
+  min_range: 10,
+  max_range: 80,
   active: true,
 };
 
-/** GET /api/sensors — liste tous les capteurs */
+/** GET /api/sensors — liste des capteurs (un seul) */
 router.get("/", async (_req, res: Response) => {
-  if (process.env.DEMO_MODE === "true") {
-    res.json([demoSensor]);
-    return;
-  }
-
-  const [rows] = await pool.execute("SELECT * FROM distance_sensors ORDER BY id");
-  res.json(rows);
+  res.json([staticSensor]);
 });
 
-/** GET /api/sensors/:id — détail d'un capteur */
+/** GET /api/sensors/:id — détail du capteur */
 router.get("/:id", async (req, res: Response) => {
-  if (process.env.DEMO_MODE === "true") {
-    if (Number(req.params.id) !== demoSensor.id) {
-      res.status(404).json({ error: "Capteur introuvable" });
-      return;
-    }
-    res.json(demoSensor);
-    return;
-  }
-
-  const [rows] = await pool.execute(
-    "SELECT * FROM distance_sensors WHERE id = ?",
-    [req.params.id]
-  );
-  const sensors = rows as unknown[];
-  if (sensors.length === 0) {
+  if (Number(req.params.id) !== staticSensor.id) {
     res.status(404).json({ error: "Capteur introuvable" });
     return;
   }
-  res.json(sensors[0]);
-});
-
-/** POST /api/sensors — créer un capteur (authentifié) */
-router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
-  const { name, location, unit = "cm", min_range = 2, max_range = 400 } = req.body;
-  if (!name) {
-    res.status(400).json({ error: "Nom du capteur requis" });
-    return;
-  }
-  const [result] = await pool.execute(
-    "INSERT INTO distance_sensors (name, location, unit, min_range, max_range) VALUES (?, ?, ?, ?, ?)",
-    [name, location ?? null, unit, min_range, max_range]
-  );
-  const insertId = (result as { insertId: number }).insertId;
-  res.status(201).json({ id: insertId, name, location, unit, min_range, max_range });
-});
-
-/** PATCH /api/sensors/:id — modifier un capteur (authentifié) */
-router.patch("/:id", authenticate, async (req: AuthRequest, res: Response) => {
-  const { name, location, active } = req.body;
-  await pool.execute(
-    "UPDATE distance_sensors SET name = COALESCE(?, name), location = COALESCE(?, location), active = COALESCE(?, active) WHERE id = ?",
-    [name ?? null, location ?? null, active ?? null, req.params.id]
-  );
-  res.json({ success: true });
+  res.json(staticSensor);
 });
 
 export default router;

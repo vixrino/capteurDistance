@@ -45,8 +45,8 @@ export default function ReflexGame() {
     if (!playerName.trim()) return;
     const best = Math.min(...attempts);
     await api.post("/games/scores", {
-      game_id: "reflex",
-      player_name: playerName.trim(),
+      jeu: "reflex",
+      joueur: playerName.trim(),
       score,
       details: { reaction_ms: reactionMs, best_ms: best, attempts: attempts.length },
     });

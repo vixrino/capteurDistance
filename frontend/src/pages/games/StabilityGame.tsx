@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLiveDistance } from "@/hooks/useLiveDistance";
 import api from "@/api/client";
 import MeasurementChart from "@/components/MeasurementChart";
+import { randomTarget } from "@/games/range";
 
 type Phase = "waiting" | "countdown" | "playing" | "result";
 const DURATION = 10;
@@ -20,8 +21,15 @@ export default function StabilityGame() {
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Dernière mesure connue, lue par l'échantillonnage (la closure du setInterval
+  // capturait sinon une valeur figée → variance/score faux).
+  const latestRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (measurement) latestRef.current = measurement.distance_cm;
+  }, [measurement]);
+
   function startCountdown() {
-    const t = Math.round(Math.random() * 120 + 30);
+    const t = randomTarget();
     setTarget(t);
     setReadings([]);
     setSaved(false);
@@ -62,7 +70,7 @@ export default function StabilityGame() {
 
     // Sample readings
     const sampleId = setInterval(() => {
-      if (measurement) local.push(measurement.distance_cm);
+      if (latestRef.current !== null) local.push(latestRef.current);
       setReadings([...local]);
     }, 200);
 
@@ -77,8 +85,8 @@ export default function StabilityGame() {
       ? readings.reduce((s, v) => s + (v - target) ** 2, 0) / readings.length
       : 0;
     await api.post("/games/scores", {
-      game_id: "stability",
-      player_name: playerName.trim(),
+      jeu: "stability",
+      joueur: playerName.trim(),
       score,
       details: { target, variance: variance.toFixed(2), samples: readings.length },
     });

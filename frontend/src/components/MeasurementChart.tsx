@@ -42,7 +42,7 @@ export default function MeasurementChart({ data, targetLine }: Props) {
         <CartesianGrid strokeDasharray="2 6" stroke="#d8d1c0" vertical={false} />
         <XAxis dataKey="t" hide />
         <YAxis
-          domain={[0, 400]}
+          domain={[0, 90]}
           tick={{ fontSize: 10, fill: "#9c9685", fontFamily: "Hanken Grotesk, sans-serif" }}
           tickFormatter={(v) => `${v}`}
           tickLine={false}

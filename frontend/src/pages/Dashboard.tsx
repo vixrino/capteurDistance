@@ -8,7 +8,7 @@ import { Sensor } from "@/types";
 export default function Dashboard() {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [activeSensorId, setActiveSensorId] = useState(1);
-  const { measurement, history, error } = useLiveDistance(activeSensorId, 1000);
+  const { measurement, history, error } = useLiveDistance(activeSensorId, 100);
 
   useEffect(() => {
     api.get<Sensor[]>("/sensors").then(({ data }) => {
@@ -72,7 +72,7 @@ export default function Dashboard() {
             {error ? (
               <p className="py-12 text-center text-sm text-clay font-serif italic">{error}</p>
             ) : measurement ? (
-              <DistanceGauge value={measurement.distance_cm} demo={measurement.demo} />
+              <DistanceGauge value={measurement.distance_cm} max={activeSensor?.max_range ?? 80} demo={measurement.demo} />
             ) : (
               <p className="py-12 text-center text-sm text-ink-faint font-serif italic">
                 En attente du capteur…

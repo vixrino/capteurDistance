@@ -3,6 +3,10 @@ import pool from "../db/connection";
 
 const router = Router();
 
+// Plage fiable du capteur Sharp GP2Y0A21 (cm). On n'accepte/affiche que cette zone.
+const SENSOR_MIN = 10;
+const SENSOR_MAX = 80;
+
 /**
  * GET /api/measurements/latest
  * Retourne la dernière mesure.
@@ -10,7 +14,7 @@ const router = Router();
  */
 router.get("/latest", async (_req: Request, res: Response) => {
   if (process.env.DEMO_MODE === "true") {
-    const distance = Math.round(Math.random() * 150 + 10);
+    const distance = Math.round(SENSOR_MIN + Math.random() * (SENSOR_MAX - SENSOR_MIN));
     res.json({
       id: 0,
       distance_cm: distance,
@@ -66,8 +70,8 @@ router.post("/", async (req: Request, res: Response) => {
     res.status(400).json({ error: "distance_cm requis" });
     return;
   }
-  if (typeof distance_cm !== "number" || distance_cm < 0 || distance_cm > 500) {
-    res.status(400).json({ error: "distance_cm doit être un nombre entre 0 et 500" });
+  if (typeof distance_cm !== "number" || distance_cm < SENSOR_MIN || distance_cm > SENSOR_MAX) {
+    res.status(400).json({ error: `distance_cm doit être un nombre entre ${SENSOR_MIN} et ${SENSOR_MAX} cm` });
     return;
   }
 

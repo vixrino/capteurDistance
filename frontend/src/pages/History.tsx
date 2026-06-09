@@ -63,7 +63,7 @@ export default function History() {
   const chartData = [...measurements].reverse().map((m, i) => ({
     i,
     distance_cm: m.distance_cm,
-    time: new Date(m.measured_at).toLocaleTimeString("fr-FR", {
+    time: new Date(m.mesure_at).toLocaleTimeString("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
     }),
@@ -107,7 +107,7 @@ export default function History() {
                 axisLine={false}
               />
               <YAxis
-                domain={[0, 400]}
+                domain={[0, 90]}
                 tick={{ fontSize: 10, fill: "#9c9685", fontFamily: "Hanken Grotesk, sans-serif" }}
                 tickFormatter={(v) => `${v}`}
                 tickLine={false}
@@ -192,7 +192,7 @@ export default function History() {
                     <span className="text-xs text-ink-faint ml-1">cm</span>
                   </td>
                   <td className="py-3 text-sm text-ink-muted">
-                    {new Date(m.measured_at).toLocaleString("fr-FR")}
+                    {new Date(m.mesure_at).toLocaleString("fr-FR")}
                   </td>
                 </tr>
               ))}

@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 interface Props {
   value: number;
   max?: number;
@@ -5,8 +7,27 @@ interface Props {
   demo?: boolean;
 }
 
-export default function DistanceGauge({ value, max = 400, unit = "cm", demo = false }: Props) {
-  const clamped = Math.min(Math.max(value, 0), max);
+export default function DistanceGauge({ value, max = 80, unit = "cm", demo = false }: Props) {
+  // Valeur affichée lissée : glisse vers `value` à 60 fps (anti-saccade).
+  // Le capteur débite ~5 mesures/s ; l'interpolation comble les intervalles.
+  const [display, setDisplay] = useState(value);
+  const targetRef = useRef(value);
+  useEffect(() => { targetRef.current = value; }, [value]);
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      setDisplay((prev) => {
+        const target = targetRef.current;
+        const next = prev + (target - prev) * 0.18;     // easing exponentiel
+        return Math.abs(target - next) < 0.03 ? target : next;
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const clamped = Math.min(Math.max(display, 0), max);
   const pct = clamped / max;
 
   // SVG horizontal scale geometry
@@ -16,18 +37,20 @@ export default function DistanceGauge({ value, max = 400, unit = "cm", demo = fa
   const usable = W - PAD * 2;
   const x = PAD + pct * usable;
 
+  // Seuils relatifs à l'échelle (fonctionne quelle que soit la plage du capteur)
   const accent =
-    value < 30 ? "#b24a2e" :
-    value < 100 ? "#a8812e" :
+    display < max * 0.3 ? "#b24a2e" :
+    display < max * 0.65 ? "#a8812e" :
     "#211f1b";
 
   const zone =
-    value < 30 ? "Très proche" :
-    value < 100 ? "Proche" :
-    value < 250 ? "Distance moyenne" :
+    display < max * 0.3 ? "Très proche" :
+    display < max * 0.6 ? "Proche" :
+    display < max * 0.85 ? "Distance moyenne" :
     "Éloigné";
 
-  const majorTicks = [0, 100, 200, 300, 400];
+  // 5 graduations principales réparties sur la plage (ex. 0,20,40,60,80)
+  const majorTicks = Array.from({ length: 5 }, (_, i) => Math.round((i * max) / 4));
   const minorTicks = Array.from({ length: 41 }, (_, i) => (i * max) / 40);
 
   return (
@@ -36,7 +59,7 @@ export default function DistanceGauge({ value, max = 400, unit = "cm", demo = fa
       {/* Big serif readout */}
       <div className="flex items-baseline gap-2">
         <span className="num text-7xl leading-none text-ink tracking-tight">
-          {value.toFixed(1)}
+          {display.toFixed(1)}
         </span>
         <span className="font-serif italic text-2xl text-ink-muted">{unit}</span>
       </div>

@@ -2,16 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import { useLiveDistance } from "@/hooks/useLiveDistance";
 import api from "@/api/client";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { TARGET_MIN, TARGET_MAX } from "@/games/range";
 
 const DURATION = 30;
 const SAMPLES = 150; // 5/s × 30s
 
 function generateTarget(): number[] {
   const pts: number[] = [];
-  let v = 100;
+  let v = (TARGET_MIN + TARGET_MAX) / 2;
   for (let i = 0; i < SAMPLES; i++) {
-    v += (Math.random() - 0.5) * 30;
-    v = Math.max(20, Math.min(350, v));
+    v += (Math.random() - 0.5) * 12;
+    v = Math.max(TARGET_MIN, Math.min(TARGET_MAX, v));
     pts.push(Math.round(v));
   }
   return pts;
@@ -33,6 +34,12 @@ export default function MaestroGame() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sampleRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const localActual = useRef<number[]>([]);
+
+  // Dernière mesure connue (l'échantillonnage lisait sinon une mesure figée).
+  const latestRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (measurement) latestRef.current = measurement.distance_cm;
+  }, [measurement]);
 
   function start() {
     const t = generateTarget();
@@ -77,8 +84,8 @@ export default function MaestroGame() {
     }, 100);
 
     sampleRef.current = setInterval(() => {
-      if (measurement) {
-        localActual.current.push(measurement.distance_cm);
+      if (latestRef.current !== null) {
+        localActual.current.push(latestRef.current);
         setActual([...localActual.current]);
       }
     }, 200);
@@ -96,8 +103,8 @@ export default function MaestroGame() {
       ? actual.slice(0, minLen).reduce((s, v, i) => s + Math.abs(v - target[i]), 0) / minLen
       : 0;
     await api.post("/games/scores", {
-      game_id: "maestro",
-      player_name: playerName.trim(),
+      jeu: "maestro",
+      joueur: playerName.trim(),
       score,
       details: { mae: mae.toFixed(2), samples: actual.length },
     });
@@ -153,7 +160,7 @@ export default function MaestroGame() {
             <LineChart data={chartData} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="i" hide />
-              <YAxis domain={[0, 400]} tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(v) => `${v}cm`} />
+              <YAxis domain={[0, 90]} tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(v) => `${v}cm`} />
               <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
               <Legend />
               <Line type="monotone" dataKey="target" stroke="#3b82f6" strokeWidth={2} dot={false} name="Cible" />

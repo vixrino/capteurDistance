@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLiveDistance } from "@/hooks/useLiveDistance";
 import api from "@/api/client";
 import MeasurementChart from "@/components/MeasurementChart";
+import { randomTarget } from "@/games/range";
 
 type Phase = "waiting" | "playing" | "result";
 
@@ -23,8 +24,15 @@ export default function GuessGame() {
 
   const { measurement, history } = useLiveDistance(1, 500);
 
+  // Dernière mesure connue, toujours à jour — évite de lire un `measurement`
+  // périmé/null au moment où la phase passe à "result" (affichait 0.0 cm).
+  const latestRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (measurement) latestRef.current = measurement.distance_cm;
+  }, [measurement]);
+
   function startGame() {
-    const t = Math.round(Math.random() * 150 + 20);
+    const t = randomTarget();
     setTarget(t);
     setCountdown(3);
     setPhase("playing");
@@ -44,17 +52,19 @@ export default function GuessGame() {
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
   useEffect(() => {
-    if (phase === "result" && measurement) {
-      setActualDist(measurement.distance_cm);
-      setScore(computeScore(target, measurement.distance_cm));
+    if (phase === "result") {
+      const d = latestRef.current;
+      if (d === null) return;
+      setActualDist(d);
+      setScore(computeScore(target, d));
     }
   }, [phase]);
 
   async function saveScore() {
     if (!playerName.trim()) return;
     await api.post("/games/scores", {
-      game_id: "guess",
-      player_name: playerName.trim(),
+      jeu: "guess",
+      joueur: playerName.trim(),
       score,
       details: { target, actual: actualDist },
     });

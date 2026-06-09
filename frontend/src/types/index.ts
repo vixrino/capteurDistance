@@ -17,9 +17,9 @@ export interface Sensor {
 
 export interface Measurement {
   id?: number;
-  sensor_id: number;
+  sensor_id?: number;
   distance_cm: number;
-  measured_at: string;
+  mesure_at: string;
   demo?: boolean;
 }
 

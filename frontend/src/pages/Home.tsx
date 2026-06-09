@@ -18,7 +18,7 @@ const TAG: Record<string, string> = {
 };
 
 export default function Home() {
-  const { measurement, history, error } = useLiveDistance(1, 1000);
+  const { measurement, history, error } = useLiveDistance(1, 100);
 
   return (
     <div className="animate-rise">
