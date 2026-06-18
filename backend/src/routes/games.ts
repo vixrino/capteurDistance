@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
-import privatePool from "../db/connectionPrivate";
+import privatePool, { SCORES_TABLE } from "../db/connectionPrivate";
 
 const router = Router();
 
-const VALID_GAMES = ["guess", "stability", "reflex", "maestro", "morse"];
+const VALID_GAMES = ["maestro", "sound_pitch", "screen_sync", "color_zone", "state_watch", "hangar_quiz"];
 
 /**
  * GET /api/games/scores?jeu=guess&limit=10
@@ -12,7 +12,7 @@ router.get("/scores", async (req: Request, res: Response) => {
   const jeu = req.query.jeu as string | undefined;
   const limit = Math.min(Number(req.query.limit) || 10, 100);
 
-  let query = "SELECT * FROM scores";
+  let query = `SELECT * FROM ${SCORES_TABLE}`;
   const params: (string | number)[] = [];
 
   if (jeu) {
@@ -43,7 +43,7 @@ router.post("/scores", async (req: Request, res: Response) => {
   }
 
   const [result] = await privatePool.execute(
-    "INSERT INTO scores (jeu, joueur, score, details) VALUES (?, ?, ?, ?)",
+    `INSERT INTO ${SCORES_TABLE} (jeu, joueur, score, details) VALUES (?, ?, ?, ?)`,
     [jeu, joueur, score, details ? JSON.stringify(details) : null]
   );
   const insertId = (result as { insertId: number }).insertId;

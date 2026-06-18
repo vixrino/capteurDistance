@@ -6,11 +6,12 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import History from "@/pages/History";
 import GameHub from "@/pages/games/GameHub";
-import GuessGame from "@/pages/games/GuessGame";
-import StabilityGame from "@/pages/games/StabilityGame";
-import ReflexGame from "@/pages/games/ReflexGame";
 import MaestroGame from "@/pages/games/MaestroGame";
-import MorseGame from "@/pages/games/MorseGame";
+import ScreenSyncGame from "@/pages/games/ScreenSyncGame";
+import DiapasonGame from "@/pages/games/DiapasonGame";
+import HangarQuizGame from "@/pages/games/HangarQuizGame";
+import CameleonGame from "@/pages/games/CameleonGame";
+import VeilleurGame from "@/pages/games/VeilleurGame";
 
 export default function App() {
   return (
@@ -23,11 +24,12 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/history" element={<History />} />
           <Route path="/games" element={<GameHub />} />
-          <Route path="/games/guess" element={<GuessGame />} />
-          <Route path="/games/stability" element={<StabilityGame />} />
-          <Route path="/games/reflex" element={<ReflexGame />} />
           <Route path="/games/maestro" element={<MaestroGame />} />
-          <Route path="/games/morse" element={<MorseGame />} />
+          <Route path="/games/sound_pitch" element={<DiapasonGame />} />
+          <Route path="/games/screen_sync" element={<ScreenSyncGame />} />
+          <Route path="/games/color_zone" element={<CameleonGame />} />
+          <Route path="/games/state_watch" element={<VeilleurGame />} />
+          <Route path="/games/hangar_quiz" element={<HangarQuizGame />} />
         </Routes>
       </Layout>
     </BrowserRouter>

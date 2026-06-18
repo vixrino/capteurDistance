@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth";
 import sensorRoutes from "./routes/sensors";
 import measurementRoutes from "./routes/measurements";
 import gameRoutes from "./routes/games";
+import externalRoutes from "./routes/external";
 import { errorHandler } from "./middleware/errorHandler";
 import pool from "./db/connection";
 
@@ -49,6 +50,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/sensors", sensorRoutes);
 app.use("/api/measurements", measurementRoutes);
 app.use("/api/games", gameRoutes);
+app.use("/api/external", externalRoutes);
 
 app.use(errorHandler);
 

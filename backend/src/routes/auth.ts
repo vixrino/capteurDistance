@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import privatePool from "../db/connectionPrivate";
+import privatePool, { USERS_TABLE } from "../db/connectionPrivate";
 
 const router = Router();
 
@@ -24,16 +24,10 @@ router.post("/register", async (req: Request, res: Response) => {
     return;
   }
 
-  if (process.env.DEMO_MODE === "true") {
-    const user = { id: 1, username, email };
-    res.status(201).json({ token: createToken(user.id, user.username), user, demo: true });
-    return;
-  }
-
   try {
     const hash = await bcrypt.hash(password, 10);
     const [result] = await privatePool.execute(
-      "INSERT INTO utilisateurs (username, email, password_hash) VALUES (?, ?, ?)",
+      `INSERT INTO ${USERS_TABLE} (username, email, password_hash) VALUES (?, ?, ?)`,
       [username, email, hash]
     );
     const insertId = (result as { insertId: number }).insertId;
@@ -62,16 +56,9 @@ router.post("/login", async (req: Request, res: Response) => {
     return;
   }
 
-  if (process.env.DEMO_MODE === "true") {
-    const username = email.split("@")[0] || "demo";
-    const user = { id: 1, username, email };
-    res.json({ token: createToken(user.id, user.username), user, demo: true });
-    return;
-  }
-
   try {
     const [rows] = await privatePool.execute(
-      "SELECT id, username, email, password_hash FROM utilisateurs WHERE email = ?",
+      `SELECT id, username, email, password_hash FROM ${USERS_TABLE} WHERE email = ?`,
       [email]
     );
     const users = rows as { id: number; username: string; email: string; password_hash: string }[];

@@ -2,20 +2,7 @@ import { Link } from "react-router-dom";
 import DistanceGauge from "@/components/DistanceGauge";
 import MeasurementChart from "@/components/MeasurementChart";
 import { useLiveDistance } from "@/hooks/useLiveDistance";
-
-const GAMES = [
-  { id: "guess", n: "01", name: "Devine la distance", desc: "Place un objet à la distance cible exacte.", diff: "Facile" as const },
-  { id: "stability", n: "02", name: "Stabilité", desc: "Maintiens ta main immobile pendant 10 secondes.", diff: "Moyen" as const },
-  { id: "reflex", n: "03", name: "Réflexes éclair", desc: "Réagis vite quand le signal apparaît.", diff: "Moyen" as const },
-  { id: "maestro", n: "04", name: "Le Maestro", desc: "Suis une courbe cible avec ta main sur 30 s.", diff: "Difficile" as const },
-  { id: "morse", n: "05", name: "Distance Morse", desc: "Encode un mot en Morse avec tes mouvements.", diff: "Difficile" as const },
-];
-
-const TAG: Record<string, string> = {
-  Facile: "tag tag-easy",
-  Moyen: "tag tag-medium",
-  Difficile: "tag tag-hard",
-};
+import { GAMES, TAG } from "@/games/catalog";
 
 export default function Home() {
   const { measurement, history, error } = useLiveDistance(1, 100);
@@ -35,7 +22,7 @@ export default function Home() {
           <p className="text-base text-ink-muted leading-relaxed max-w-md">
             Un capteur <span className="text-ink">HC-SR04</span> relié à une carte{" "}
             <span className="text-ink">Tiva C</span>. Visualisation live, archive
-            des mesures et cinq mini-jeux qui transforment vos gestes en score.
+            des mesures et {GAMES.length} mini-jeux qui transforment vos gestes en score.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Link to="/dashboard" className="btn-ink">Ouvrir le dashboard</Link>
@@ -81,7 +68,7 @@ export default function Home() {
       {/* ── Games ── */}
       <section className="pt-12">
         <div className="flex items-baseline justify-between mb-8">
-          <h2 className="font-serif text-3xl text-ink">Cinq mini-jeux</h2>
+          <h2 className="font-serif text-3xl text-ink">{GAMES.length} mini-jeux</h2>
           <span className="eyebrow">Arcade capteur</span>
         </div>
 
@@ -97,7 +84,7 @@ export default function Home() {
                 <h3 className="font-serif text-xl text-ink group-hover:text-clay transition-colors">
                   {g.name}
                 </h3>
-                <p className="text-sm text-ink-muted mt-0.5">{g.desc}</p>
+                <p className="text-sm text-ink-muted mt-0.5">{g.short}</p>
               </div>
               <span className={`${TAG[g.diff]} hidden sm:inline-flex`}>{g.diff}</span>
               <span className="text-ink-faint group-hover:text-clay group-hover:translate-x-1 transition-all text-lg shrink-0">

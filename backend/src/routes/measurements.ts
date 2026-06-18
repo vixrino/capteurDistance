@@ -7,6 +7,13 @@ const router = Router();
 const SENSOR_MIN = 10;
 const SENSOR_MAX = 80;
 
+// Table des mesures. Sur la base partagée, notre table est `g8a_mesures` ;
+// en local (XAMPP/MAMP) c'est `mesures`. Surchargeable via .env.
+const ID_RE = /^[a-zA-Z0-9_]+$/;
+const MEASURES_TABLE = (process.env.MEASURES_TABLE && ID_RE.test(process.env.MEASURES_TABLE))
+  ? process.env.MEASURES_TABLE
+  : "mesures";
+
 /**
  * GET /api/measurements/latest
  * Retourne la dernière mesure.
@@ -25,7 +32,7 @@ router.get("/latest", async (_req: Request, res: Response) => {
   }
 
   const [rows] = await pool.execute(
-    "SELECT * FROM mesures ORDER BY mesure_at DESC LIMIT 1"
+    `SELECT * FROM \`${MEASURES_TABLE}\` ORDER BY mesure_at DESC LIMIT 1`
   );
   const list = rows as unknown[];
   if (list.length === 0) {
@@ -43,11 +50,11 @@ router.get("/history", async (req: Request, res: Response) => {
   const offset = Number(req.query.offset) || 0;
 
   const [rows] = await pool.execute(
-    "SELECT * FROM mesures ORDER BY mesure_at DESC LIMIT ? OFFSET ?",
+    `SELECT * FROM \`${MEASURES_TABLE}\` ORDER BY mesure_at DESC LIMIT ? OFFSET ?`,
     [limit, offset]
   );
   const [countRows] = await pool.execute(
-    "SELECT COUNT(*) as total FROM mesures"
+    `SELECT COUNT(*) as total FROM \`${MEASURES_TABLE}\``
   );
   const total = (countRows as { total: number }[])[0].total;
   res.json({ data: rows, total, limit, offset });
@@ -76,7 +83,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 
   const [result] = await pool.execute(
-    "INSERT INTO mesures (distance_cm) VALUES (?)",
+    `INSERT INTO \`${MEASURES_TABLE}\` (distance_cm) VALUES (?)`,
     [distance_cm]
   );
   const insertId = (result as { insertId: number }).insertId;
