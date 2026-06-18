@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql -u root -e \"SELECT user, plugin, host FROM mysql.user WHERE user='root';\")",
+      "Bash(sudo mysql -u root -e \"SELECT user, plugin, host FROM mysql.user WHERE user='root';\")",
+      "Bash(mysql -u root --password=\"\" -e \"SELECT user, plugin FROM mysql.user WHERE user='root';\")",
+      "Bash(mysql -u root -proot -e \"SELECT user, plugin FROM mysql.user WHERE user='root';\")",
+      "Bash(mysql -u root -proot)",
+      "Bash(mysql -u root -proot capteur_distance -e \"SHOW TABLES; DESCRIBE mesures;\")",
+      "Bash(chmod +x /home/sh4down/capteurDistance/backend/serial_reader.py)",
+      "Bash(git pull *)",
+      "Read(//home/sh4down/.nvm/**)",
+      "Bash(snap list *)",
+      "Bash(curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh)",
+      "Bash(bash)",
+      "Bash(mysql -u dade64253 -phbxfdIxJRzZPd5nq3wEuxuyF -h 178.33.122.21 -P 3306 hangardb_dade64253 -e \"SHOW TABLES;\")",
+      "Bash(mysql -u dade64253 -phbxfdIxJRzZPd5nq3wEuxuyF -h 178.33.122.21 -P 3306 hangardb_dade64253)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -m venv /home/sh4down/capteurDistance/backend/.venv)",
+      "Bash(/home/sh4down/capteurDistance/backend/.venv/bin/pip install *)",
+      "Bash(sleep 4 && cat /tmp/backend.log)",
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:3001/api/health)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s http://localhost:3001/api/measurements/latest)",
+      "Bash(mysql -u dade64253 -phbxfdIxJRzZPd5nq3wEuxuyF -h 178.33.122.21 hangardb_dade64253 -e \"SELECT COUNT\\(*\\) as nb_mesures FROM mesures;\")"
+    ]
+  }
+}
