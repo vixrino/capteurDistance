@@ -3,6 +3,7 @@ import { useLiveDistance } from "@/hooks/useLiveDistance";
 import api from "@/api/client";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { TARGET_MIN, TARGET_MAX } from "@/games/range";
+import Leaderboard from "@/components/Leaderboard";
 
 const DURATION = 30;
 const SAMPLES = 150; // 5/s × 30s
@@ -29,6 +30,7 @@ export default function MaestroGame() {
   const [countdown, setCountdown] = useState(3);
   const [playerName, setPlayerName] = useState("");
   const [saved, setSaved] = useState(false);
+  const [lbKey, setLbKey] = useState(0);
 
   const { measurement } = useLiveDistance(1, 200);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -109,6 +111,7 @@ export default function MaestroGame() {
       details: { mae: mae.toFixed(2), samples: actual.length },
     });
     setSaved(true);
+    setLbKey((k) => k + 1);
   }
 
   const chartData = target.map((t, i) => ({
@@ -192,6 +195,8 @@ export default function MaestroGame() {
           )}
         </div>
       )}
+
+      <Leaderboard jeu="maestro" refreshKey={lbKey} />
     </div>
   );
 }

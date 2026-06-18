@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLiveDistance } from "@/hooks/useLiveDistance";
 import api from "@/api/client";
 import { StateReading } from "@/types";
+import Leaderboard from "@/components/Leaderboard";
 
 type Phase = "idle" | "armed" | "alert" | "result";
 const TRIGGER_DIST = 20;
@@ -15,6 +16,7 @@ export default function VeilleurGame() {
   const [simulated, setSimulated] = useState(false);
   const [playerName, setPlayerName] = useState("");
   const [saved, setSaved] = useState(false);
+  const [lbKey, setLbKey] = useState(0);
 
   const phaseRef = useRef<Phase>("idle");
   const alertTimeRef = useRef(0);
@@ -82,6 +84,7 @@ export default function VeilleurGame() {
       details: { reaction_ms: reactionMs, best_ms: Math.min(...attempts), simule: simulated },
     });
     setSaved(true);
+    setLbKey((k) => k + 1);
   }
 
   const bg = phase === "armed" ? "bg-slate-100" : phase === "alert" ? "bg-red-500" : "bg-white";
@@ -153,6 +156,8 @@ export default function VeilleurGame() {
           Le capteur 8B est actuellement au repos : les alertes sont simulées en attendant qu'il s'active réellement.
         </p>
       )}
+
+      <Leaderboard jeu="state_watch" refreshKey={lbKey} />
     </div>
   );
 }

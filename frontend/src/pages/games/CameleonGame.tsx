@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLiveDistance } from "@/hooks/useLiveDistance";
 import api from "@/api/client";
 import { LedReading } from "@/types";
+import Leaderboard from "@/components/Leaderboard";
 
 type Phase = "waiting" | "playing" | "result";
 
@@ -27,6 +28,7 @@ export default function CameleonGame() {
   const [countdown, setCountdown] = useState(6);
   const [playerName, setPlayerName] = useState("");
   const [saved, setSaved] = useState(false);
+  const [lbKey, setLbKey] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { measurement } = useLiveDistance(1, 300);
@@ -77,6 +79,7 @@ export default function CameleonGame() {
       details: { couleur: zone?.couleur, zone: `${zone?.min}-${zone?.max}`, actual: actualDist },
     });
     setSaved(true);
+    setLbKey((k) => k + 1);
   }
 
   return (
@@ -146,6 +149,8 @@ export default function CameleonGame() {
           <button onClick={startGame} className="w-full border border-slate-200 rounded-lg py-2.5 text-sm hover:bg-slate-50 transition">Rejouer</button>
         </div>
       )}
+
+      <Leaderboard jeu="color_zone" refreshKey={lbKey} />
     </div>
   );
 }

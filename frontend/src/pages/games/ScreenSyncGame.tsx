@@ -3,6 +3,7 @@ import { useLiveDistance } from "@/hooks/useLiveDistance";
 import { useScreenData } from "@/hooks/useScreenData";
 import api from "@/api/client";
 import { TARGET_MIN, TARGET_MAX, SENSOR_MIN, SENSOR_MAX } from "@/games/range";
+import Leaderboard from "@/components/Leaderboard";
 
 type Phase = "idle" | "playing" | "result";
 const DURATION_MS = 15000;
@@ -26,6 +27,7 @@ export default function ScreenSyncGame() {
   const [avgError, setAvgError] = useState(0);
   const [playerName, setPlayerName] = useState("");
   const [saved, setSaved] = useState(false);
+  const [lbKey, setLbKey] = useState(0);
 
   const { measurement } = useLiveDistance(1, 200);
   const { screen } = useScreenData(1000);
@@ -97,6 +99,7 @@ export default function ScreenSyncGame() {
       details: { avg_error_cm: Number(avgError.toFixed(2)), duration_s: DURATION_MS / 1000 },
     });
     setSaved(true);
+    setLbKey((k) => k + 1);
   }
 
   const dist = measurement?.distance_cm ?? null;
@@ -188,6 +191,8 @@ export default function ScreenSyncGame() {
           </button>
         </div>
       )}
+
+      <Leaderboard jeu="screen_sync" refreshKey={lbKey} />
     </div>
   );
 }

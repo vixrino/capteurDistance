@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "@/api/client";
 import { SensorsSnapshot } from "@/types";
+import Leaderboard from "@/components/Leaderboard";
 
 interface Question {
   capteur: string;
@@ -91,6 +92,7 @@ export default function HangarQuizGame() {
   const [loading, setLoading] = useState(true);
   const [playerName, setPlayerName] = useState("");
   const [saved, setSaved] = useState(false);
+  const [lbKey, setLbKey] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -129,6 +131,7 @@ export default function HangarQuizGame() {
       details: { correct, total: questions.length },
     });
     setSaved(true);
+    setLbKey((k) => k + 1);
   }
 
   const q = questions[idx];
@@ -209,6 +212,8 @@ export default function HangarQuizGame() {
           <button onClick={load} className="w-full border border-slate-200 rounded-lg py-2.5 text-sm hover:bg-slate-50 transition">Rejouer</button>
         </div>
       )}
+
+      <Leaderboard jeu="hangar_quiz" refreshKey={lbKey} />
     </div>
   );
 }
