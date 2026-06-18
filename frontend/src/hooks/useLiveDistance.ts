@@ -1,13 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import api from "@/api/client";
 import { Measurement } from "@/types";
+import { usePageVisible } from "@/hooks/usePageVisible";
 
-/** Poll /api/measurements/latest every `intervalMs` ms. */
+/**
+ * Interroge /api/measurements/latest toutes les `intervalMs` ms.
+ * Éco-conception : le polling est suspendu quand l'onglet est masqué
+ * et reprend (avec un rafraîchissement immédiat) au retour de l'utilisateur.
+ */
 export function useLiveDistance(sensorId = 1, intervalMs = 1000) {
   const [measurement, setMeasurement] = useState<Measurement | null>(null);
   const [history, setHistory] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const visible = usePageVisible();
 
   const fetchLatest = async () => {
     try {
@@ -21,12 +27,14 @@ export function useLiveDistance(sensorId = 1, intervalMs = 1000) {
   };
 
   useEffect(() => {
+    if (!visible) return; // onglet caché : aucune requête
+
     fetchLatest();
     intervalRef.current = setInterval(fetchLatest, intervalMs);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [sensorId, intervalMs]);
+  }, [sensorId, intervalMs, visible]);
 
   return { measurement, history, error };
 }

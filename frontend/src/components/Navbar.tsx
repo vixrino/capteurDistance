@@ -24,7 +24,7 @@ export default function Navbar() {
 
         {/* Brand */}
         <Link to="/" className="flex items-baseline gap-2 group">
-          <span className="font-serif text-xl leading-none text-ink">Distance</span>
+          <span className="font-serif text-xl leading-none text-ink">WebKit</span>
           <span className="text-[10px] tracking-[0.2em] uppercase text-clay font-semibold">
             HC-SR04
           </span>

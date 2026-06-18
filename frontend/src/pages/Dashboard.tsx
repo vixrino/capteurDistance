@@ -8,7 +8,7 @@ import { Sensor } from "@/types";
 export default function Dashboard() {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [activeSensorId, setActiveSensorId] = useState(1);
-  const { measurement, history, error } = useLiveDistance(activeSensorId, 100);
+  const { measurement, history, error } = useLiveDistance(activeSensorId, 1000);
 
   useEffect(() => {
     api.get<Sensor[]>("/sensors").then(({ data }) => {

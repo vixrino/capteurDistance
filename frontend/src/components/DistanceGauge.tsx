@@ -8,24 +8,30 @@ interface Props {
 }
 
 export default function DistanceGauge({ value, max = 80, unit = "cm", demo = false }: Props) {
-  // Valeur affichée lissée : glisse vers `value` à 60 fps (anti-saccade).
-  // Le capteur débite ~5 mesures/s ; l'interpolation comble les intervalles.
+  // Valeur affichée lissée : glisse vers `value` (anti-saccade).
+  // Éco-conception : la boucle d'animation ne tourne QUE pendant la transition,
+  // puis s'arrête une fois la cible atteinte (pas de rAF 60 fps en continu).
   const [display, setDisplay] = useState(value);
   const targetRef = useRef(value);
-  useEffect(() => { targetRef.current = value; }, [value]);
   useEffect(() => {
+    targetRef.current = value;
     let raf = 0;
     const tick = () => {
+      let settled = false;
       setDisplay((prev) => {
         const target = targetRef.current;
         const next = prev + (target - prev) * 0.18;     // easing exponentiel
-        return Math.abs(target - next) < 0.03 ? target : next;
+        if (Math.abs(target - next) < 0.03) {
+          settled = true;
+          return target;
+        }
+        return next;
       });
-      raf = requestAnimationFrame(tick);
+      if (!settled) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [value]);
 
   const clamped = Math.min(Math.max(display, 0), max);
   const pct = clamped / max;
