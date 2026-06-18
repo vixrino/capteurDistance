@@ -28,3 +28,10 @@ Thumbs.db
 .cache/
 .parcel-cache/
 *.tsbuildinfo
+
+# Python
+.venv/
+*/.venv/
+__pycache__/
+*.pyc
+nohup.out
