@@ -3,7 +3,7 @@ import privatePool, { SCORES_TABLE } from "../db/connectionPrivate";
 
 const router = Router();
 
-const VALID_GAMES = ["maestro", "sound_pitch", "screen_sync", "color_zone", "state_watch", "hangar_quiz"];
+const VALID_GAMES = ["maestro", "screen_sync", "color_zone", "state_watch", "hangar_quiz"];
 
 /**
  * GET /api/games/scores?jeu=guess&limit=10

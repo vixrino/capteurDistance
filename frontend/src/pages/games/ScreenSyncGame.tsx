@@ -5,7 +5,7 @@ import api from "@/api/client";
 import { TARGET_MIN, TARGET_MAX, SENSOR_MIN, SENSOR_MAX } from "@/games/range";
 
 type Phase = "idle" | "playing" | "result";
-const DURATION_MS = 30000;
+const DURATION_MS = 15000;
 
 /** Ramène la valeur de l'écran voisin dans la plage atteignable du capteur. */
 function toTarget(n: number): number {
@@ -108,7 +108,7 @@ export default function ScreenSyncGame() {
         <h1 className="text-2xl font-bold text-slate-800">Synchro Écran</h1>
         <p className="text-slate-500 text-sm mt-1">
           L'écran du groupe voisin pilote une cible mouvante. Garde ta main dessus
-          pendant 30 secondes. Plus tu colles à la cible, plus le score est haut.
+          pendant 15 secondes. Plus tu colles à la cible, plus le score est haut.
         </p>
       </div>
 
@@ -147,7 +147,7 @@ export default function ScreenSyncGame() {
 
       {phase === "idle" && (
         <button onClick={start} className="w-full px-8 py-3 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition text-lg">
-          Lancer les 30 secondes
+          Lancer les 15 secondes
         </button>
       )}
 

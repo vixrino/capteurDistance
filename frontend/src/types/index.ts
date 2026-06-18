@@ -33,7 +33,7 @@ export interface GameScore {
 }
 
 export type GameId =
-  | "maestro" | "sound_pitch" | "screen_sync"
+  | "maestro" | "screen_sync"
   | "color_zone" | "state_watch" | "hangar_quiz";
 
 /** État courant du capteur du groupe 8B. */

@@ -8,7 +8,6 @@ import History from "@/pages/History";
 import GameHub from "@/pages/games/GameHub";
 import MaestroGame from "@/pages/games/MaestroGame";
 import ScreenSyncGame from "@/pages/games/ScreenSyncGame";
-import DiapasonGame from "@/pages/games/DiapasonGame";
 import HangarQuizGame from "@/pages/games/HangarQuizGame";
 import CameleonGame from "@/pages/games/CameleonGame";
 import VeilleurGame from "@/pages/games/VeilleurGame";
@@ -25,7 +24,6 @@ export default function App() {
           <Route path="/history" element={<History />} />
           <Route path="/games" element={<GameHub />} />
           <Route path="/games/maestro" element={<MaestroGame />} />
-          <Route path="/games/sound_pitch" element={<DiapasonGame />} />
           <Route path="/games/screen_sync" element={<ScreenSyncGame />} />
           <Route path="/games/color_zone" element={<CameleonGame />} />
           <Route path="/games/state_watch" element={<VeilleurGame />} />

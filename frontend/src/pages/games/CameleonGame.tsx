@@ -24,7 +24,7 @@ export default function CameleonGame() {
   const [actualDist, setActualDist] = useState(0);
   const [score, setScore] = useState(0);
   const [inBand, setInBand] = useState(false);
-  const [countdown, setCountdown] = useState(4);
+  const [countdown, setCountdown] = useState(6);
   const [playerName, setPlayerName] = useState("");
   const [saved, setSaved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -40,11 +40,11 @@ export default function CameleonGame() {
   function startGame() {
     const z = ZONES[Math.floor(Math.random() * ZONES.length)];
     setZone(z);
-    setCountdown(4);
+    setCountdown(6);
     setPhase("playing");
     setSaved(false);
 
-    let c = 4;
+    let c = 6;
     timerRef.current = setInterval(() => {
       c -= 1;
       setCountdown(c);
@@ -110,7 +110,7 @@ export default function CameleonGame() {
 
       {phase === "waiting" && (
         <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-4">
-          <p className="text-slate-600">Une couleur va s'afficher. Tu as 4 secondes pour placer ta main dans la zone correspondante.</p>
+          <p className="text-slate-600">Une couleur va s'afficher. Tu as 6 secondes pour placer ta main dans la zone correspondante.</p>
           <button onClick={startGame} className="px-8 py-3 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition text-lg">Lancer</button>
         </div>
       )}
