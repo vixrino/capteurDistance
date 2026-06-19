@@ -4,9 +4,13 @@ import Navbar from "./Navbar";
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-paper flex flex-col">
+      <a href="#main-content" className="skip-link">
+        Aller au contenu principal
+      </a>
+
       <Navbar />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-14">
+      <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-5xl mx-auto px-6 py-14 focus:outline-none">
         {children}
       </main>
 

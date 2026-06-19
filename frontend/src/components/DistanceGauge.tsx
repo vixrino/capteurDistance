@@ -62,15 +62,20 @@ export default function DistanceGauge({ value, max = 80, unit = "cm", demo = fal
   return (
     <div className="flex flex-col items-center gap-5 select-none w-full">
 
+      {/* Annonce vocale (lecteur d'écran) : valeur stable mesurée, pas l'animation */}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        Distance mesurée : {value.toFixed(1)} {unit}, zone {zone.toLowerCase()}.
+      </p>
+
       {/* Big serif readout */}
-      <div className="flex items-baseline gap-2">
+      <div className="flex items-baseline gap-2" aria-hidden="true">
         <span className="num text-7xl leading-none text-ink tracking-tight">
           {display.toFixed(1)}
         </span>
         <span className="font-serif italic text-2xl text-ink-muted">{unit}</span>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" aria-hidden="true">
         <span className="text-[11px] tracking-[0.16em] uppercase" style={{ color: accent }}>
           {zone}
         </span>
@@ -84,8 +89,8 @@ export default function DistanceGauge({ value, max = 80, unit = "cm", demo = fal
         )}
       </div>
 
-      {/* Ruler scale */}
-      <svg viewBox={`0 0 ${W} 64`} className="w-full max-w-md overflow-visible">
+      {/* Ruler scale — purement décoratif, la valeur est lue ci-dessus */}
+      <svg viewBox={`0 0 ${W} 64`} aria-hidden="true" focusable="false" className="w-full max-w-md overflow-visible">
         {/* minor ticks */}
         {minorTicks.map((t, i) => {
           const tx = PAD + (t / max) * usable;

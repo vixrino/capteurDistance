@@ -56,7 +56,11 @@ export default function ActuatorControls() {
           {actuators.map((a) => (
             <div key={a.id} className="py-3 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
-                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${a.etat === "on" ? "bg-moss animate-pulse" : "bg-line"}`} />
+                <span
+                  className={`w-2.5 h-2.5 rounded-full shrink-0 ${a.etat === "on" ? "bg-moss animate-pulse" : "bg-line"}`}
+                  role="img"
+                  aria-label={a.etat === "on" ? "Allumé" : "Éteint"}
+                />
                 <div className="min-w-0">
                   <p className="font-serif text-base text-ink leading-tight truncate">{a.nom}</p>
                   <p className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">
@@ -66,6 +70,8 @@ export default function ActuatorControls() {
               </div>
               <button
                 onClick={() => toggle(a)}
+                aria-pressed={a.etat === "on"}
+                aria-label={`${a.nom} : ${a.etat === "on" ? "allumé, cliquer pour éteindre" : "éteint, cliquer pour allumer"}`}
                 className={`text-xs px-3 py-1.5 border transition-colors shrink-0 ${
                   a.etat === "on" ? "border-moss text-moss" : "border-line text-ink-muted hover:border-ink hover:text-ink"
                 }`}

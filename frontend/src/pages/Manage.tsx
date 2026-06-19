@@ -95,14 +95,18 @@ function ActuatorSection({ actuators, reload }: { actuators: Actuator[]; reload:
       </div>
 
       {/* Création */}
-      <div className="card p-5 grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+      <form
+        className="card p-5 grid grid-cols-1 sm:grid-cols-12 gap-4 items-end"
+        aria-label="Ajouter un actionneur"
+        onSubmit={(e) => { e.preventDefault(); create(); }}
+      >
         <div className="sm:col-span-4">
-          <label className="eyebrow">Nom</label>
-          <input className="field mt-1" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="LED de proximité" />
+          <label htmlFor="act-nom" className="eyebrow">Nom</label>
+          <input id="act-nom" className="field mt-1" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="LED de proximité" />
         </div>
         <div className="sm:col-span-2">
-          <label className="eyebrow">Type</label>
-          <select className="field mt-1" value={type} onChange={(e) => setType(e.target.value as Actuator["type"])}>
+          <label htmlFor="act-type" className="eyebrow">Type</label>
+          <select id="act-type" className="field mt-1" value={type} onChange={(e) => setType(e.target.value as Actuator["type"])}>
             <option value="led">LED</option>
             <option value="buzzer">Buzzer</option>
             <option value="relais">Relais</option>
@@ -110,20 +114,20 @@ function ActuatorSection({ actuators, reload }: { actuators: Actuator[]; reload:
           </select>
         </div>
         <div className="sm:col-span-3">
-          <label className="eyebrow">Déclenche si distance</label>
-          <select className="field mt-1" value={sens} onChange={(e) => setSens(e.target.value as "below" | "above")}>
+          <label htmlFor="act-sens" className="eyebrow">Déclenche si distance</label>
+          <select id="act-sens" className="field mt-1" value={sens} onChange={(e) => setSens(e.target.value as "below" | "above")}>
             <option value="below">en dessous du seuil</option>
             <option value="above">au-dessus du seuil</option>
           </select>
         </div>
         <div className="sm:col-span-2">
-          <label className="eyebrow">Seuil (cm)</label>
-          <input type="number" className="field mt-1" value={seuil} onChange={(e) => setSeuil(Number(e.target.value))} />
+          <label htmlFor="act-seuil" className="eyebrow">Seuil (cm)</label>
+          <input id="act-seuil" type="number" className="field mt-1" value={seuil} onChange={(e) => setSeuil(Number(e.target.value))} />
         </div>
         <div className="sm:col-span-1">
-          <button className="btn-ink w-full" disabled={busy} onClick={create}>+</button>
+          <button type="submit" className="btn-ink w-full" disabled={busy} aria-label="Ajouter l'actionneur">+</button>
         </div>
-      </div>
+      </form>
 
       {/* Liste */}
       {actuators.length === 0 ? (
@@ -134,7 +138,11 @@ function ActuatorSection({ actuators, reload }: { actuators: Actuator[]; reload:
             <div key={a.id} className="py-4 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
               {/* Etat + nom */}
               <div className="sm:col-span-4 flex items-center gap-3">
-                <span className={`w-2.5 h-2.5 rounded-full ${a.etat === "on" ? "bg-moss animate-pulse" : "bg-line"}`} />
+                <span
+                  className={`w-2.5 h-2.5 rounded-full ${a.etat === "on" ? "bg-moss animate-pulse" : "bg-line"}`}
+                  role="img"
+                  aria-label={a.etat === "on" ? "Allumé" : "Éteint"}
+                />
                 <div>
                   <p className="font-serif text-lg text-ink leading-tight">{a.nom}</p>
                   <p className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">{TYPE_LABEL[a.type]}</p>
@@ -145,6 +153,7 @@ function ActuatorSection({ actuators, reload }: { actuators: Actuator[]; reload:
               <div className="sm:col-span-2">
                 <select
                   className="field py-1 text-sm"
+                  aria-label={`Mode de ${a.nom}`}
                   value={a.mode}
                   onChange={(e) => patch(a, { mode: e.target.value as Actuator["mode"] })}
                 >
@@ -157,6 +166,7 @@ function ActuatorSection({ actuators, reload }: { actuators: Actuator[]; reload:
               <div className="sm:col-span-4 flex items-center gap-2">
                 <select
                   className="field py-1 text-sm"
+                  aria-label={`Sens du seuil automatique de ${a.nom}`}
                   value={a.sens}
                   disabled={a.mode !== "auto"}
                   onChange={(e) => patch(a, { sens: e.target.value as "below" | "above" })}
@@ -167,6 +177,7 @@ function ActuatorSection({ actuators, reload }: { actuators: Actuator[]; reload:
                 <input
                   type="number"
                   className="field py-1 text-sm w-20"
+                  aria-label={`Seuil automatique de ${a.nom} en centimètres`}
                   value={a.seuil_cm}
                   disabled={a.mode !== "auto"}
                   onChange={(e) => patch(a, { seuil_cm: Number(e.target.value) })}
@@ -178,6 +189,8 @@ function ActuatorSection({ actuators, reload }: { actuators: Actuator[]; reload:
               <div className="sm:col-span-2 flex items-center justify-end gap-3">
                 <button
                   onClick={() => toggle(a)}
+                  aria-pressed={a.etat === "on"}
+                  aria-label={`${a.nom} : ${a.etat === "on" ? "allumé, cliquer pour éteindre" : "éteint, cliquer pour allumer"}`}
                   className={`text-xs px-3 py-1.5 border transition-colors ${
                     a.etat === "on"
                       ? "border-moss text-moss"
@@ -186,7 +199,9 @@ function ActuatorSection({ actuators, reload }: { actuators: Actuator[]; reload:
                 >
                   {a.etat === "on" ? "ON" : "OFF"}
                 </button>
-                <button onClick={() => remove(a)} className="text-ink-faint hover:text-clay transition-colors text-lg leading-none" title="Supprimer">×</button>
+                <button onClick={() => remove(a)} aria-label={`Supprimer l'actionneur ${a.nom}`} className="text-ink-faint hover:text-clay transition-colors text-lg leading-none">
+                  <span aria-hidden="true">×</span>
+                </button>
               </div>
             </div>
           ))}
@@ -259,37 +274,43 @@ function AlertSection({
       )}
 
       {/* Création */}
-      <div className="card p-5 grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+      <form
+        className="card p-5 grid grid-cols-1 sm:grid-cols-12 gap-4 items-end"
+        aria-label="Ajouter une règle d'alerte"
+        onSubmit={(e) => { e.preventDefault(); create(); }}
+      >
         <div className="sm:col-span-3">
-          <label className="eyebrow">Libellé</label>
-          <input className="field mt-1" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Objet trop proche" />
+          <label htmlFor="alert-label" className="eyebrow">Libellé</label>
+          <input id="alert-label" className="field mt-1" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Objet trop proche" />
         </div>
         <div className="sm:col-span-3">
-          <label className="eyebrow">Condition</label>
-          <select className="field mt-1" value={comparateur} onChange={(e) => setComparateur(e.target.value as "below" | "above")}>
+          <label htmlFor="alert-comp" className="eyebrow">Condition</label>
+          <select id="alert-comp" className="field mt-1" value={comparateur} onChange={(e) => setComparateur(e.target.value as "below" | "above")}>
             <option value="below">distance en dessous du seuil</option>
             <option value="above">distance au-dessus du seuil</option>
           </select>
         </div>
         <div className="sm:col-span-2">
-          <label className="eyebrow">Seuil (cm)</label>
-          <input type="number" className="field mt-1" value={seuil} onChange={(e) => setSeuil(Number(e.target.value))} />
+          <label htmlFor="alert-seuil" className="eyebrow">Seuil (cm)</label>
+          <input id="alert-seuil" type="number" className="field mt-1" value={seuil} onChange={(e) => setSeuil(Number(e.target.value))} />
         </div>
         <div className="sm:col-span-3">
-          <label className="eyebrow">E-mail</label>
-          <input className="field mt-1" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="toi@isep.fr" />
+          <label htmlFor="alert-email" className="eyebrow">E-mail</label>
+          <input id="alert-email" type="email" autoComplete="email" className="field mt-1" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="toi@isep.fr" />
         </div>
         <div className="sm:col-span-1">
-          <button className="btn-ink w-full" disabled={busy} onClick={create}>+</button>
+          <button type="submit" className="btn-ink w-full" disabled={busy} aria-label="Ajouter la règle d'alerte">+</button>
         </div>
-      </div>
+      </form>
 
       <div className="flex flex-wrap items-center gap-4">
         <button className="btn-line text-xs" onClick={testEmail}>Envoyer un e-mail de test</button>
         <button className="btn-line text-xs" onClick={() => evaluate(10)}>Simuler 10 cm</button>
         <button className="btn-line text-xs" onClick={() => evaluate(70)}>Simuler 70 cm</button>
-        {testMsg && <span className="text-sm text-ink-muted italic font-serif">{testMsg}</span>}
       </div>
+      <p role="status" aria-live="polite" className="text-sm text-ink-muted italic font-serif min-h-[1.25rem]">
+        {testMsg}
+      </p>
 
       {/* Liste */}
       {alerts.length === 0 ? (
@@ -316,13 +337,17 @@ function AlertSection({
               <div className="sm:col-span-3 flex items-center justify-end gap-3">
                 <button
                   onClick={() => patch(a, { active: a.active ? 0 : 1 })}
+                  aria-pressed={!!a.active}
+                  aria-label={`Alerte « ${a.label} » : ${a.active ? "active, cliquer pour désactiver" : "inactive, cliquer pour activer"}`}
                   className={`text-xs px-3 py-1.5 border transition-colors ${
                     a.active ? "border-moss text-moss" : "border-line text-ink-muted hover:border-ink hover:text-ink"
                   }`}
                 >
                   {a.active ? "Active" : "Inactive"}
                 </button>
-                <button onClick={() => remove(a)} className="text-ink-faint hover:text-clay transition-colors text-lg leading-none" title="Supprimer">×</button>
+                <button onClick={() => remove(a)} aria-label={`Supprimer l'alerte ${a.label}`} className="text-ink-faint hover:text-clay transition-colors text-lg leading-none">
+                  <span aria-hidden="true">×</span>
+                </button>
               </div>
             </div>
           ))}
@@ -352,10 +377,11 @@ function EventSection({ events, reload }: { events: AlertEvent[]; reload: () => 
         <p className="text-sm text-ink-faint font-serif italic py-4">Aucun déclenchement pour l'instant.</p>
       ) : (
         <table className="w-full border-t border-line">
+          <caption className="sr-only">Journal des déclenchements d'alerte récents</caption>
           <thead>
             <tr>
               {["Quand", "Alerte", "Distance", "E-mail", "Statut"].map((h) => (
-                <th key={h} className="text-left py-3 text-[11px] tracking-[0.14em] uppercase text-ink-faint font-medium border-b border-line">
+                <th key={h} scope="col" className="text-left py-3 text-[11px] tracking-[0.14em] uppercase text-ink-faint font-medium border-b border-line">
                   {h}
                 </th>
               ))}

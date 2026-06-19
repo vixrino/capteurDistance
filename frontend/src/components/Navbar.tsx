@@ -20,11 +20,11 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="border-b border-line bg-paper sticky top-0 z-50">
+    <nav aria-label="Navigation principale" className="border-b border-line bg-paper sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
 
         {/* Brand */}
-        <Link to="/" className="flex items-baseline gap-2 group">
+        <Link to="/" aria-label="WebKit HC-SR04 — accueil" className="flex items-baseline gap-2 group">
           <span className="font-serif text-xl leading-none text-ink">WebKit</span>
           <span className="text-[10px] tracking-[0.2em] uppercase text-clay font-semibold">
             HC-SR04
@@ -39,12 +39,14 @@ export default function Navbar() {
               <Link
                 key={to}
                 to={to}
+                aria-current={active ? "page" : undefined}
                 className={`relative text-sm tracking-wide transition-colors ${
                   active ? "text-ink" : "text-ink-muted hover:text-ink"
                 }`}
               >
                 {label}
                 <span
+                  aria-hidden="true"
                   className={`absolute -bottom-1.5 left-0 h-px bg-clay transition-all duration-300 ${
                     active ? "w-full" : "w-0"
                   }`}

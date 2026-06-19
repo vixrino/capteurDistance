@@ -36,30 +36,36 @@ export default function Login() {
       </p>
 
       {error && (
-        <p className="mt-6 text-sm text-clay font-serif italic border-l-2 border-clay pl-3">
+        <p role="alert" className="mt-6 text-sm text-clay font-serif italic border-l-2 border-clay pl-3">
           {error}
         </p>
       )}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-7">
         <div>
-          <label className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">Email</label>
+          <label htmlFor="login-email" className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">Email</label>
           <input
+            id="login-email"
             type="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            aria-invalid={error ? true : undefined}
             className="field mt-1"
             placeholder="toi@isep.fr"
           />
         </div>
         <div>
-          <label className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">Mot de passe</label>
+          <label htmlFor="login-password" className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">Mot de passe</label>
           <input
+            id="login-password"
             type="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            aria-invalid={error ? true : undefined}
             className="field mt-1"
           />
         </div>

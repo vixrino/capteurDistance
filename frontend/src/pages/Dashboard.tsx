@@ -56,15 +56,15 @@ export default function Dashboard() {
           <h1 className="font-serif text-5xl text-ink leading-none">Dashboard</h1>
         </div>
         <span className="flex items-center gap-2 text-[11px] tracking-[0.14em] uppercase text-ink-muted pb-1">
-          <span className={`w-1.5 h-1.5 rounded-full ${error ? "bg-clay" : "bg-moss animate-pulse"}`} />
+          <span aria-hidden="true" className={`w-1.5 h-1.5 rounded-full ${error ? "bg-clay" : "bg-moss animate-pulse"}`} />
           {error ? "Hors ligne" : measurement?.demo ? "Démo" : "Live"}
         </span>
       </header>
 
       {/* ── Bannière d'alerte récente ── */}
       {recentIsFresh && recentAlert && (
-        <div className="flex items-start gap-3 border-l-2 border-clay bg-clay/5 px-4 py-3">
-          <span className="w-2 h-2 rounded-full bg-clay mt-1.5 animate-pulse shrink-0" />
+        <div role="alert" className="flex items-start gap-3 border-l-2 border-clay bg-clay/5 px-4 py-3">
+          <span aria-hidden="true" className="w-2 h-2 rounded-full bg-clay mt-1.5 animate-pulse shrink-0" />
           <div>
             <p className="text-sm text-ink">
               <span className="font-medium">{recentAlert.label}</span> — {recentAlert.message}
