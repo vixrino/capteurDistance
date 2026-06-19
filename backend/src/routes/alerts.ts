@@ -11,6 +11,17 @@ const router = Router();
 
 const COMP = ["below", "above"];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const demoAlert = {
+  id: 1,
+  label: "Alerte proximite",
+  comparateur: "below",
+  seuil_cm: 15,
+  email: "demo@example.com",
+  active: 1,
+  cooldown_s: 60,
+  derniere_alerte_at: null,
+  created_at: new Date().toISOString(),
+};
 
 /** GET /api/alerts/config — état du service mail (configuré ou simulé) */
 router.get("/config", (_req: Request, res: Response) => {
@@ -19,12 +30,22 @@ router.get("/config", (_req: Request, res: Response) => {
 
 /** GET /api/alerts — liste des règles d'alerte */
 router.get("/", async (_req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json([demoAlert]);
+    return;
+  }
+
   const [rows] = await privatePool.query(`SELECT * FROM \`${ALERTS_TABLE}\` ORDER BY id`);
   res.json(rows);
 });
 
 /** GET /api/alerts/events?limit=20 — journal des déclenchements */
 router.get("/events", async (req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json([]);
+    return;
+  }
+
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const [rows] = await privatePool.query(
     `SELECT * FROM \`${ALERT_EVENTS_TABLE}\` ORDER BY created_at DESC LIMIT ?`,
@@ -35,6 +56,11 @@ router.get("/events", async (req: Request, res: Response) => {
 
 /** POST /api/alerts — créer une règle */
 router.post("/", async (req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.status(201).json({ ...demoAlert, ...req.body, id: Date.now(), created_at: new Date().toISOString() });
+    return;
+  }
+
   const { label, comparateur = "below", seuil_cm = 15, email, cooldown_s = 60 } = req.body;
   if (!label || !email) {
     res.status(400).json({ error: "label et email sont requis" });
@@ -53,6 +79,11 @@ router.post("/", async (req: Request, res: Response) => {
 
 /** PATCH /api/alerts/:id — modifier une règle */
 router.patch("/:id", async (req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json({ ...demoAlert, ...req.body, id: Number(req.params.id) });
+    return;
+  }
+
   const id = Number(req.params.id);
   const { label, comparateur, seuil_cm, email, active, cooldown_s } = req.body;
 
@@ -82,6 +113,11 @@ router.patch("/:id", async (req: Request, res: Response) => {
 
 /** DELETE /api/alerts/:id */
 router.delete("/:id", async (req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json({ success: true, demo: true });
+    return;
+  }
+
   const id = Number(req.params.id);
   await privatePool.execute(`DELETE FROM \`${ALERTS_TABLE}\` WHERE id = ?`, [id]);
   res.json({ success: true });
@@ -111,6 +147,13 @@ router.post("/evaluate", async (req: Request, res: Response) => {
   const { distance_cm } = req.body;
   if (typeof distance_cm !== "number") {
     res.status(400).json({ error: "distance_cm (number) requis" });
+    return;
+  }
+  if (process.env.DEMO_MODE === "true") {
+    const triggered = distance_cm < demoAlert.seuil_cm
+      ? [{ ...demoAlert, distance_cm, message: `Distance sous ${demoAlert.seuil_cm} cm`, email_status: "simule" }]
+      : [];
+    res.json({ distance_cm, triggered, demo: true });
     return;
   }
   const triggered = await evaluateAlerts(distance_cm);

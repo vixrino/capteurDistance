@@ -10,15 +10,35 @@ const router = Router();
 const TYPES = ["led", "buzzer", "relais", "moteur"];
 const MODES = ["manuel", "auto"];
 const SENS = ["below", "above"];
+const demoActuator = {
+  id: 1,
+  nom: "LED de proximite",
+  type: "led",
+  etat: "off",
+  mode: "auto",
+  sens: "below",
+  seuil_cm: 20,
+  updated_at: new Date().toISOString(),
+};
 
 /** GET /api/actuators — liste tous les actionneurs */
 router.get("/", async (_req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json([demoActuator]);
+    return;
+  }
+
   const [rows] = await privatePool.query(`SELECT * FROM \`${ACTUATORS_TABLE}\` ORDER BY id`);
   res.json(rows);
 });
 
 /** POST /api/actuators — créer un actionneur */
 router.post("/", async (req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.status(201).json({ ...demoActuator, ...req.body, id: Date.now(), updated_at: new Date().toISOString() });
+    return;
+  }
+
   const { nom, type = "led", mode = "manuel", sens = "below", seuil_cm = 20 } = req.body;
   if (!nom) {
     res.status(400).json({ error: "Le nom est requis" });
@@ -38,6 +58,11 @@ router.post("/", async (req: Request, res: Response) => {
 
 /** PATCH /api/actuators/:id — modifier (nom, mode, sens, seuil, etat) */
 router.patch("/:id", async (req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json({ ...demoActuator, ...req.body, id: Number(req.params.id), updated_at: new Date().toISOString() });
+    return;
+  }
+
   const id = Number(req.params.id);
   const { nom, type, mode, sens, seuil_cm, etat } = req.body;
 
@@ -66,6 +91,11 @@ router.patch("/:id", async (req: Request, res: Response) => {
 
 /** POST /api/actuators/:id/toggle — bascule on/off (force le mode manuel) */
 router.post("/:id/toggle", async (req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json({ id: Number(req.params.id), etat: "on", mode: "manuel", demo: true });
+    return;
+  }
+
   const id = Number(req.params.id);
   const [rows] = await privatePool.query(`SELECT etat FROM \`${ACTUATORS_TABLE}\` WHERE id = ?`, [id]);
   const list = rows as { etat: string }[];
@@ -82,6 +112,11 @@ router.post("/:id/toggle", async (req: Request, res: Response) => {
 
 /** DELETE /api/actuators/:id */
 router.delete("/:id", async (req: Request, res: Response) => {
+  if (process.env.DEMO_MODE === "true") {
+    res.json({ success: true, demo: true });
+    return;
+  }
+
   const id = Number(req.params.id);
   await privatePool.execute(`DELETE FROM \`${ACTUATORS_TABLE}\` WHERE id = ?`, [id]);
   res.json({ success: true });
