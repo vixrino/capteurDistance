@@ -288,6 +288,95 @@ router.get("/sound/quiz", async (_req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /api/external/sound/history?limit=60
+ * Historique horodaté du micro (G8C) pour tracer décibels & fréquence.
+ */
+router.get("/sound/history", async (req: Request, res: Response) => {
+  const limit = Math.min(Number(req.query.limit) || 60, 300);
+  try {
+    const [rows] = await pool.query(
+      `SELECT id, ts, hertz, decibels, note FROM \`${SOUND_TABLE}\` ORDER BY ts DESC LIMIT ?`,
+      [limit]
+    );
+    const list = (rows as Record<string, unknown>[]).reverse();
+    if (list.length === 0) throw new Error("table vide");
+    res.json({ demo: false, table: SOUND_TABLE, rows: list });
+  } catch (err) {
+    const now = Date.now();
+    const rows = Array.from({ length: limit }, (_, i) => {
+      const d = demoSound();
+      return { id: i, ts: new Date(now - (limit - i) * 60000).toISOString(), hertz: d.hertz, decibels: d.decibels, note: d.note };
+    });
+    res.json({ demo: true, table: SOUND_TABLE, note: (err as Error).message, rows });
+  }
+});
+
+// Table d'historique des commandes LED (G8E) — surchargeable via .env.
+const LED_CONTROL_TABLE = process.env.LED_CONTROL_TABLE || "g8e_led_control";
+// Table d'historique des transitions d'état (G8B) — surchargeable via .env.
+const STATE_HISTORY_TABLE = process.env.STATE_HISTORY_TABLE || "g8b_valeurs";
+
+/**
+ * GET /api/external/led/history?limit=120
+ * Historique des commandes LED RGB (G8E) + distribution par couleur
+ * (prête à tracer en barres).
+ */
+router.get("/led/history", async (req: Request, res: Response) => {
+  const limit = Math.min(Number(req.query.limit) || 120, 500);
+  try {
+    const [rows] = await pool.query(
+      `SELECT id, expediteur, r, g, b, date_envoi FROM \`${LED_CONTROL_TABLE}\` ORDER BY id DESC LIMIT ?`,
+      [limit]
+    );
+    const raw = rows as { id: number; expediteur: string; r: string; g: string; b: string; date_envoi: string }[];
+    if (raw.length === 0) throw new Error("table vide");
+
+    const mapped = raw.map((row) => {
+      const key = `${row.r},${row.g},${row.b}`;
+      const col = RGB_COLORS[key] || { couleur: "?", hex: "#64748b" };
+      return { ...row, ...col };
+    });
+
+    const counts: Record<string, { couleur: string; hex: string; count: number }> = {};
+    for (const m of mapped) {
+      if (!counts[m.couleur]) counts[m.couleur] = { couleur: m.couleur, hex: m.hex, count: 0 };
+      counts[m.couleur].count++;
+    }
+    const distribution = Object.values(counts).sort((a, b) => b.count - a.count);
+    res.json({ demo: false, table: LED_CONTROL_TABLE, rows: mapped.reverse(), distribution });
+  } catch (err) {
+    const colors = Object.values(RGB_COLORS).filter((c) => c.couleur !== "OFF");
+    const distribution = colors.map((c) => ({ couleur: c.couleur, hex: c.hex, count: Math.floor(Math.random() * 20) + 1 }));
+    res.json({ demo: true, table: LED_CONTROL_TABLE, note: (err as Error).message, rows: [], distribution });
+  }
+});
+
+/**
+ * GET /api/external/state/history?limit=60
+ * Historique des transitions d'état (G8B) : suite de 0/1 horodatés.
+ */
+router.get("/state/history", async (req: Request, res: Response) => {
+  const limit = Math.min(Number(req.query.limit) || 60, 300);
+  try {
+    const [rows] = await pool.query(
+      `SELECT id, etat, last_change FROM \`${STATE_HISTORY_TABLE}\` ORDER BY id DESC LIMIT ?`,
+      [limit]
+    );
+    const list = (rows as Record<string, unknown>[]).reverse();
+    if (list.length === 0) throw new Error("table vide");
+    res.json({ demo: false, table: STATE_HISTORY_TABLE, rows: list });
+  } catch (err) {
+    const now = Date.now();
+    const rows = Array.from({ length: limit }, (_, i) => ({
+      id: i,
+      etat: Math.random() > 0.6 ? 1 : 0,
+      last_change: new Date(now - (limit - i) * 30000).toISOString(),
+    }));
+    res.json({ demo: true, table: STATE_HISTORY_TABLE, note: (err as Error).message, rows });
+  }
+});
+
 // Mapping RGB (HIGH/LOW) → couleur, pour la LED du groupe 8E (g8e_led_control).
 const RGB_COLORS: Record<string, { couleur: string; hex: string }> = {
   "HIGH,LOW,LOW": { couleur: "ROUGE", hex: "#ef4444" },

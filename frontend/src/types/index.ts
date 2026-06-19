@@ -137,6 +137,41 @@ export interface Weather {
   source: string;
 }
 
+/** Point d'historique du micro voisin (G8C). */
+export interface SoundPoint {
+  id: number;
+  ts: string;
+  hertz: number;
+  decibels: number;
+  note: string;
+}
+
+/** Commande LED historisée (G8E) enrichie de la couleur. */
+export interface LedPoint {
+  id: number;
+  expediteur: string;
+  r: string;
+  g: string;
+  b: string;
+  date_envoi: string;
+  couleur: string;
+  hex: string;
+}
+
+/** Distribution des couleurs LED (comptage). */
+export interface LedDistribution {
+  couleur: string;
+  hex: string;
+  count: number;
+}
+
+/** Point d'historique d'état (G8B). */
+export interface StatePoint {
+  id: number;
+  etat: number;
+  last_change: string | null;
+}
+
 /** Photo instantanée de tous les capteurs voisins. */
 export interface SensorsSnapshot {
   sound: { hertz: number; decibels: number; note: string; ts: string } | null;

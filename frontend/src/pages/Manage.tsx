@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "@/api/client";
 import { Actuator, AlertRule, AlertEvent } from "@/types";
+import NeighborCharts from "@/components/NeighborCharts";
 
 const TYPE_LABEL: Record<Actuator["type"], string> = {
   led: "LED", buzzer: "Buzzer", relais: "Relais", moteur: "Moteur",
@@ -44,6 +45,7 @@ export default function Manage() {
       </header>
 
       <ActuatorSection actuators={actuators} reload={loadActuators} />
+      <NeighborCharts />
       <AlertSection
         alerts={alerts}
         reload={loadAlerts}
