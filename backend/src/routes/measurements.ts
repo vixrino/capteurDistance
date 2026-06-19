@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import pool from "../db/connection";
+import { processMeasurement } from "../services/alertEngine";
 
 const router = Router();
 
@@ -87,7 +88,11 @@ router.post("/", async (req: Request, res: Response) => {
     [distance_cm]
   );
   const insertId = (result as { insertId: number }).insertId;
-  res.status(201).json({ id: insertId, distance_cm, mesure_at: new Date().toISOString() });
+
+  // Évalue les alertes + actionneurs auto sur cette nouvelle mesure.
+  const triggered = await processMeasurement(distance_cm);
+
+  res.status(201).json({ id: insertId, distance_cm, mesure_at: new Date().toISOString(), alerts: triggered });
 });
 
 export default router;

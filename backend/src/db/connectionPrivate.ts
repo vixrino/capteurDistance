@@ -25,5 +25,8 @@ function safeTable(name: string | undefined, fallback: string): string {
 }
 export const USERS_TABLE = safeTable(process.env.USERS_TABLE, "g8a_users");
 export const SCORES_TABLE = safeTable(process.env.SCORES_TABLE, "g8a_scores");
+export const ACTUATORS_TABLE = safeTable(process.env.ACTUATORS_TABLE, "g8a_actionneurs");
+export const ALERTS_TABLE = safeTable(process.env.ALERTS_TABLE, "g8a_alertes");
+export const ALERT_EVENTS_TABLE = safeTable(process.env.ALERT_EVENTS_TABLE, "g8a_alert_events");
 
 export default privatePool;

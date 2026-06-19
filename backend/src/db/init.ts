@@ -21,12 +21,14 @@ async function initDatabase() {
     multipleStatements: true,
   });
 
-  const publicSql  = path.join(__dirname, "../../../db/init.sql");
-  const privateSql = path.join(__dirname, "../../../db/init_private.sql");
+  const publicSql   = path.join(__dirname, "../../../db/init.sql");
+  const privateSql  = path.join(__dirname, "../../../db/init_private.sql");
+  const featuresSql = path.join(__dirname, "../../../db/init_features.sql");
 
   try {
-    await runSqlFile(conn, publicSql,  "Base publique  'capteur_distance'  → table mesures créée.");
-    await runSqlFile(conn, privateSql, "Base privée    'capteur_private'   → tables utilisateurs + scores créées.");
+    await runSqlFile(conn, publicSql,   "Base publique  'capteur_distance'  → table mesures créée.");
+    await runSqlFile(conn, privateSql,  "Base privée    'capteur_private'   → tables utilisateurs + scores créées.");
+    await runSqlFile(conn, featuresSql, "Fonctionnalités → tables actionneurs + alertes + events créées.");
   } finally {
     await conn.end();
   }

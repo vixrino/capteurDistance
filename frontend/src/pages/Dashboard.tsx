@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import api from "@/api/client";
 import DistanceGauge from "@/components/DistanceGauge";
 import MeasurementChart from "@/components/MeasurementChart";
+import WeatherPanel from "@/components/WeatherPanel";
+import ActuatorControls from "@/components/ActuatorControls";
 import { useLiveDistance } from "@/hooks/useLiveDistance";
-import { Sensor } from "@/types";
+import { Sensor, AlertEvent } from "@/types";
 
 export default function Dashboard() {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [activeSensorId, setActiveSensorId] = useState(1);
+  const [recentAlert, setRecentAlert] = useState<AlertEvent | null>(null);
   const { measurement, history, error } = useLiveDistance(activeSensorId, 1000);
 
   useEffect(() => {
@@ -17,7 +20,22 @@ export default function Dashboard() {
     });
   }, []);
 
+  // Dernier déclenchement d'alerte (bannière), rafraîchi périodiquement.
+  useEffect(() => {
+    const load = () => {
+      api.get<AlertEvent[]>("/alerts/events?limit=1")
+        .then(({ data }) => setRecentAlert(data[0] ?? null))
+        .catch(() => {});
+    };
+    load();
+    const t = setInterval(load, 5000);
+    return () => clearInterval(t);
+  }, []);
+
   const activeSensor = sensors.find((s) => s.id === activeSensorId);
+  const recentIsFresh = recentAlert
+    ? Date.now() - new Date(recentAlert.created_at).getTime() < 120000
+    : false;
 
   const stats =
     history.length > 0
@@ -42,6 +60,21 @@ export default function Dashboard() {
           {error ? "Hors ligne" : measurement?.demo ? "Démo" : "Live"}
         </span>
       </header>
+
+      {/* ── Bannière d'alerte récente ── */}
+      {recentIsFresh && recentAlert && (
+        <div className="flex items-start gap-3 border-l-2 border-clay bg-clay/5 px-4 py-3">
+          <span className="w-2 h-2 rounded-full bg-clay mt-1.5 animate-pulse shrink-0" />
+          <div>
+            <p className="text-sm text-ink">
+              <span className="font-medium">{recentAlert.label}</span> — {recentAlert.message}
+            </p>
+            <p className="text-[11px] tracking-[0.14em] uppercase text-ink-faint mt-0.5">
+              {new Date(recentAlert.created_at).toLocaleString("fr-FR")} · e-mail {recentAlert.email_status}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Sensor selector ── */}
       {sensors.length > 1 && (
@@ -106,6 +139,16 @@ export default function Dashboard() {
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* ── Actionneurs + Météo externe ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="lg:col-span-6">
+          <ActuatorControls />
+        </div>
+        <div className="lg:col-span-6 lg:border-l lg:border-line lg:pl-10">
+          <WeatherPanel />
         </div>
       </div>
 

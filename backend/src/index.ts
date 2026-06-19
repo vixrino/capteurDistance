@@ -6,8 +6,12 @@ import sensorRoutes from "./routes/sensors";
 import measurementRoutes from "./routes/measurements";
 import gameRoutes from "./routes/games";
 import externalRoutes from "./routes/external";
+import actuatorRoutes from "./routes/actuators";
+import alertRoutes from "./routes/alerts";
+import weatherRoutes from "./routes/weather";
 import { errorHandler } from "./middleware/errorHandler";
 import pool from "./db/connection";
+import { ensureSchema } from "./db/ensureSchema";
 
 dotenv.config();
 
@@ -51,10 +55,19 @@ app.use("/api/sensors", sensorRoutes);
 app.use("/api/measurements", measurementRoutes);
 app.use("/api/games", gameRoutes);
 app.use("/api/external", externalRoutes);
+app.use("/api/actuators", actuatorRoutes);
+app.use("/api/alerts", alertRoutes);
+app.use("/api/weather", weatherRoutes);
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀  Backend démarré sur http://localhost:${PORT}`);
   console.log(`📡  Mode démo : ${process.env.DEMO_MODE === "true" ? "activé" : "désactivé"}`);
+  try {
+    await ensureSchema();
+    console.log("🗄️   Schéma vérifié (actionneurs, alertes, events).");
+  } catch (err) {
+    console.error("⚠️   ensureSchema:", (err as Error).message);
+  }
 });

@@ -83,6 +83,60 @@ export interface SoundQuiz {
   options: string[];
 }
 
+/** Actionneur piloté depuis le site (LED, buzzer, relais…). */
+export interface Actuator {
+  id: number;
+  nom: string;
+  type: "led" | "buzzer" | "relais" | "moteur";
+  etat: "on" | "off";
+  mode: "manuel" | "auto";
+  sens: "below" | "above";
+  seuil_cm: number;
+  updated_at: string;
+}
+
+/** Règle d'alerte avec notification e-mail. */
+export interface AlertRule {
+  id: number;
+  label: string;
+  comparateur: "below" | "above";
+  seuil_cm: number;
+  email: string;
+  active: number;
+  cooldown_s: number;
+  derniere_alerte_at: string | null;
+  created_at: string;
+}
+
+/** Déclenchement d'alerte journalisé. */
+export interface AlertEvent {
+  id: number;
+  alerte_id: number | null;
+  label: string;
+  distance_cm: number;
+  message: string;
+  email: string;
+  email_status: "envoye" | "simule" | "echec";
+  created_at: string;
+}
+
+/** Météo Open-Meteo + impact sur la mesure de distance. */
+export interface Weather {
+  demo: boolean;
+  note?: string;
+  ville: string;
+  temperature: number;
+  ressenti: number | null;
+  humidite: number | null;
+  vent: number | null;
+  vitesse_son: number;
+  vitesse_son_ref: number;
+  facteur_correction: number;
+  ecart_pct: number;
+  exemple: { brut_cm: number; corrige_cm: number };
+  source: string;
+}
+
 /** Photo instantanée de tous les capteurs voisins. */
 export interface SensorsSnapshot {
   sound: { hertz: number; decibels: number; note: string; ts: string } | null;

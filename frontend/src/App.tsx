@@ -4,6 +4,7 @@ import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
+import Manage from "@/pages/Manage";
 import History from "@/pages/History";
 import GameHub from "@/pages/games/GameHub";
 import MaestroGame from "@/pages/games/MaestroGame";
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/manage" element={<Manage />} />
           <Route path="/history" element={<History />} />
           <Route path="/games" element={<GameHub />} />
           <Route path="/games/maestro" element={<MaestroGame />} />

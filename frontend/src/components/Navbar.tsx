@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 const NAV = [
   { to: "/", label: "Accueil" },
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/manage", label: "Gestion" },
   { to: "/history", label: "Historique" },
   { to: "/games", label: "Mini-jeux" },
 ];
