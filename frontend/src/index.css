@@ -4,13 +4,30 @@
 
 @layer base {
   :root {
-    --paper: #f3efe6;
-    --paper-raised: #faf7f0;
-    --ink: #211f1b;
-    --ink-muted: #76705f;
-    --ink-faint: #9c9685;
-    --line: #d8d1c0;
-    --clay: #b24a2e;
+    /* Canaux RGB (espacés) consommés par Tailwind ET par la couche components */
+    --c-paper: 243 239 230;
+    --c-paper-raised: 250 247 240;
+    --c-paper-sunk: 236 231 218;
+    --c-ink: 33 31 27;
+    --c-ink-soft: 85 80 71;
+    --c-ink-muted: 118 112 95;
+    --c-ink-faint: 156 150 133;
+    --c-line: 216 209 192;
+    --c-line-strong: 196 188 166;
+    --c-clay: 178 74 46;
+    --c-clay-soft: 198 106 78;
+    --c-clay-deep: 143 58 35;
+    --c-ochre: 168 129 46;
+    --c-moss: 79 106 82;
+
+    /* Alias couleur pour la couche components (résolus à l'usage) */
+    --paper: rgb(var(--c-paper));
+    --paper-raised: rgb(var(--c-paper-raised));
+    --ink: rgb(var(--c-ink));
+    --ink-muted: rgb(var(--c-ink-muted));
+    --ink-faint: rgb(var(--c-ink-faint));
+    --line: rgb(var(--c-line));
+    --clay: rgb(var(--c-clay));
   }
 
   html {
@@ -26,14 +43,14 @@
   }
 
   ::selection {
-    background: rgba(178, 74, 46, 0.16);
+    background: rgb(var(--c-clay) / 0.16);
     color: var(--ink);
   }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #cfc7b4; }
-  ::-webkit-scrollbar-thumb:hover { background: #bcb29b; }
+  ::-webkit-scrollbar-thumb { background: rgb(var(--c-line-strong)); }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--c-ink-faint)); }
 
   h1, h2, h3 {
     font-family: "Fraunces", Georgia, serif;
@@ -140,9 +157,9 @@
     text-transform: uppercase;
     color: var(--ink-muted);
   }
-  .tag-easy   { color: #4f6a52; }
-  .tag-medium { color: #a8812e; }
-  .tag-hard   { color: #b24a2e; }
+  .tag-easy   { color: rgb(var(--c-moss)); }
+  .tag-medium { color: rgb(var(--c-ochre)); }
+  .tag-hard   { color: rgb(var(--c-clay)); }
 
   /* ── Field ── */
   .field {
@@ -245,18 +262,22 @@
   scroll-behavior: auto !important;
 }
 
-/* ── Accessibilité : contraste élevé (réglage manuel du widget) ── */
+/* ── Accessibilité : contraste élevé ── */
 .a11y-contrast {
-  --ink: #000000;
-  --ink-muted: #1c1a16;
-  --ink-faint: #2f2c25;
-  --line: #000000;
-  --paper: #ffffff;
-  --paper-raised: #ffffff;
-  --clay: #8f2f15;
-}
-.a11y-contrast body {
-  background-color: #ffffff;
+  --c-paper: 255 255 255;
+  --c-paper-raised: 255 255 255;
+  --c-paper-sunk: 245 245 245;
+  --c-ink: 0 0 0;
+  --c-ink-soft: 0 0 0;
+  --c-ink-muted: 26 26 26;
+  --c-ink-faint: 45 45 45;
+  --c-line: 0 0 0;
+  --c-line-strong: 0 0 0;
+  --c-clay: 140 40 15;
+  --c-clay-soft: 150 50 25;
+  --c-clay-deep: 110 30 10;
+  --c-ochre: 120 80 0;
+  --c-moss: 30 70 35;
 }
 .a11y-contrast .card,
 .a11y-contrast .btn-ink,
@@ -264,13 +285,99 @@
   border-width: 2px;
 }
 
-/* ── Accessibilité : soulignement des liens (réglage manuel du widget) ── */
+/* ── Accessibilité : mode sombre ── */
+.a11y-dark {
+  --c-paper: 21 19 15;
+  --c-paper-raised: 32 29 23;
+  --c-paper-sunk: 16 14 11;
+  --c-ink: 236 231 218;
+  --c-ink-soft: 200 194 180;
+  --c-ink-muted: 179 171 154;
+  --c-ink-faint: 138 132 116;
+  --c-line: 58 53 44;
+  --c-line-strong: 74 68 56;
+  --c-clay: 210 114 79;
+  --c-clay-soft: 219 129 99;
+  --c-clay-deep: 184 86 56;
+  --c-ochre: 205 168 78;
+  --c-moss: 121 160 125;
+  color-scheme: dark;
+}
+
+/* ── Accessibilité : niveaux de gris & saturation réduite (filtres) ── */
+.a11y-grayscale { filter: grayscale(1); }
+.a11y-low-saturation { filter: saturate(0.55); }
+.a11y-grayscale.a11y-low-saturation { filter: grayscale(1) saturate(0.55); }
+
+/* ── Accessibilité : soulignement des liens ── */
 .a11y-underline-links a {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
+/* ── Accessibilité : surlignage des liens ── */
+.a11y-highlight-links a {
+  background: rgb(var(--c-ochre) / 0.22);
+  box-shadow: 0 0 0 2px rgb(var(--c-ochre) / 0.22);
+  border-radius: 2px;
+}
+
+/* ── Accessibilité : police lisible (dyslexie) ── */
+.a11y-readable-font,
+.a11y-readable-font * {
+  font-family: "Atkinson Hyperlegible", Verdana, Tahoma, sans-serif !important;
+  letter-spacing: 0.03em;
+}
+
+/* ── Accessibilité : espacement du texte (WCAG 1.4.12) ── */
+.a11y-text-spacing p,
+.a11y-text-spacing li,
+.a11y-text-spacing span,
+.a11y-text-spacing a,
+.a11y-text-spacing dd,
+.a11y-text-spacing dt {
+  line-height: 1.9 !important;
+  letter-spacing: 0.11em !important;
+  word-spacing: 0.16em !important;
+}
+
+/* ── Accessibilité : grand curseur ── */
+.a11y-big-cursor,
+.a11y-big-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M6 2 L6 38 L16 28 L23 43 L29 40 L22 25 L36 25 Z' fill='%23000' stroke='%23fff' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") 4 2, auto !important;
+}
+
+/* ── Accessibilité : mise au point clavier renforcée ── */
+.a11y-strong-focus :focus-visible {
+  outline: 4px solid rgb(var(--c-clay)) !important;
+  outline-offset: 3px !important;
+}
+
+/* ── Accessibilité : guide de lecture (règle qui suit la souris) ── */
+.a11y-reading-guide {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 34px;
+  margin-top: -17px;
+  background: rgb(var(--c-ochre) / 0.16);
+  border-top: 2px solid rgb(var(--c-clay) / 0.8);
+  border-bottom: 2px solid rgb(var(--c-clay) / 0.8);
+  pointer-events: none;
+  z-index: 95;
+}
+
+/* ── Accessibilité : masque de lecture (assombrit hors de la bande) ── */
+.a11y-reading-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  z-index: 95;
+}
+
 /* ── Ombre portée pour le widget flottant ── */
 .shadow-lg {
-  box-shadow: 0 10px 30px -8px rgba(33, 31, 27, 0.35);
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.35);
 }

@@ -5,28 +5,30 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Palette branchée sur des variables CSS (format canaux RGB) pour
+        // permettre les thèmes d'accessibilité (mode sombre, contraste élevé).
         paper: {
-          DEFAULT: "#f3efe6",
-          raised: "#faf7f0",
-          sunk: "#ece7da",
+          DEFAULT: "rgb(var(--c-paper) / <alpha-value>)",
+          raised: "rgb(var(--c-paper-raised) / <alpha-value>)",
+          sunk: "rgb(var(--c-paper-sunk) / <alpha-value>)",
         },
         ink: {
-          DEFAULT: "#211f1b",
-          soft: "#55504733",
-          muted: "#76705f",
-          faint: "#9c9685",
+          DEFAULT: "rgb(var(--c-ink) / <alpha-value>)",
+          soft: "rgb(var(--c-ink-soft) / <alpha-value>)",
+          muted: "rgb(var(--c-ink-muted) / <alpha-value>)",
+          faint: "rgb(var(--c-ink-faint) / <alpha-value>)",
         },
         line: {
-          DEFAULT: "#d8d1c0",
-          strong: "#c4bcA6",
+          DEFAULT: "rgb(var(--c-line) / <alpha-value>)",
+          strong: "rgb(var(--c-line-strong) / <alpha-value>)",
         },
         clay: {
-          DEFAULT: "#b24a2e",
-          soft: "#c66a4e",
-          deep: "#8f3a23",
+          DEFAULT: "rgb(var(--c-clay) / <alpha-value>)",
+          soft: "rgb(var(--c-clay-soft) / <alpha-value>)",
+          deep: "rgb(var(--c-clay-deep) / <alpha-value>)",
         },
-        ochre: "#a8812e",
-        moss: "#4f6a52",
+        ochre: "rgb(var(--c-ochre) / <alpha-value>)",
+        moss: "rgb(var(--c-moss) / <alpha-value>)",
         // legacy alias so any leftover class still resolves
         brand: {
           50: "#f3efe6",
