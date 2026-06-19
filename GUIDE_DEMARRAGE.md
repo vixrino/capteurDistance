@@ -77,8 +77,10 @@ Le frontend proxie automatiquement `/api` vers `localhost:3001`.
 cd python
 pip install -r requirements.txt
 
-python lecture_serie.py --list          # trouve le bon COM
-python lecture_serie.py --port COM3      # remplace COM3 par ton port
+python lecture_serie.py --list          # affiche les ports disponibles
+python lecture_serie.py                 # essaie de détecter automatiquement le port
+python lecture_serie.py --port COM3      # Windows : remplace COM3 par ton port
+python lecture_serie.py --port /dev/cu.usbmodemXXXX  # macOS : remplace par le port affiché
 ```
 
 Affichage attendu :
@@ -116,6 +118,7 @@ Ouvrir **http://localhost:5173** :
 | `/api/health` → `db":"error"` | MySQL éteint / mauvais port / mot de passe | Démarrer MySQL dans XAMPP ; vérifier `backend/.env` (port 3306) |
 | `npm run db:init` → `ER_ACCESS_DENIED` | Mot de passe root incorrect | Ajuster `DB_PASSWORD` dans `backend/.env` |
 | Python : `could not open port COM3` | Moniteur série Energia encore ouvert, ou mauvais COM | Fermer le moniteur ; `--list` pour le bon port |
+| macOS : pas de `COM3` | Les ports macOS s'appellent `/dev/cu.usbmodem...` ou `/dev/cu.usbserial...` | `python lecture_serie.py --list`, puis utiliser le port affiché |
 | Python : `Backend injoignable` | Backend non lancé | `npm run dev` dans `backend` |
 | Python : `API a refusé (HTTP 400)` | distance hors 0–500 | Normal si capteur débranché/bruit ; vérifier câblage Sharp |
 | Site affiche « Mode démo » / valeurs aléatoires | `DEMO_MODE=true` | Mettre `DEMO_MODE=false` dans `backend/.env` puis relancer `npm run dev` |

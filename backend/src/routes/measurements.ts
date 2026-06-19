@@ -15,6 +15,27 @@ const MEASURES_TABLE = (process.env.MEASURES_TABLE && ID_RE.test(process.env.MEA
   ? process.env.MEASURES_TABLE
   : "mesures";
 
+type DemoMeasurement = {
+  id: number;
+  distance_cm: number;
+  mesure_at: string;
+  demo: true;
+};
+
+const demoMeasurements: DemoMeasurement[] = [];
+
+function createDemoMeasurement(distance_cm: number): DemoMeasurement {
+  const measurement = {
+    id: demoMeasurements.length + 1,
+    distance_cm,
+    mesure_at: new Date().toISOString(),
+    demo: true as const,
+  };
+  demoMeasurements.unshift(measurement);
+  demoMeasurements.splice(120);
+  return measurement;
+}
+
 /**
  * GET /api/measurements/latest
  * Retourne la dernière mesure.
@@ -22,13 +43,8 @@ const MEASURES_TABLE = (process.env.MEASURES_TABLE && ID_RE.test(process.env.MEA
  */
 router.get("/latest", async (_req: Request, res: Response) => {
   if (process.env.DEMO_MODE === "true") {
-    const distance = Math.round(SENSOR_MIN + Math.random() * (SENSOR_MAX - SENSOR_MIN));
-    res.json({
-      id: 0,
-      distance_cm: distance,
-      mesure_at: new Date().toISOString(),
-      demo: true,
-    });
+    const latest = demoMeasurements[0] ?? createDemoMeasurement(Math.round(SENSOR_MIN + Math.random() * (SENSOR_MAX - SENSOR_MIN)));
+    res.json(latest);
     return;
   }
 
@@ -49,6 +65,15 @@ router.get("/latest", async (_req: Request, res: Response) => {
 router.get("/history", async (req: Request, res: Response) => {
   const limit = Math.min(Number(req.query.limit) || 50, 500);
   const offset = Number(req.query.offset) || 0;
+
+  if (process.env.DEMO_MODE === "true") {
+    if (demoMeasurements.length === 0) {
+      createDemoMeasurement(Math.round(SENSOR_MIN + Math.random() * (SENSOR_MAX - SENSOR_MIN)));
+    }
+    const data = demoMeasurements.slice(offset, offset + limit);
+    res.json({ data, total: demoMeasurements.length, limit, offset, demo: true });
+    return;
+  }
 
   const [rows] = await pool.execute(
     `SELECT * FROM \`${MEASURES_TABLE}\` ORDER BY mesure_at DESC LIMIT ? OFFSET ?`,
@@ -80,6 +105,11 @@ router.post("/", async (req: Request, res: Response) => {
   }
   if (typeof distance_cm !== "number" || distance_cm < SENSOR_MIN || distance_cm > SENSOR_MAX) {
     res.status(400).json({ error: `distance_cm doit être un nombre entre ${SENSOR_MIN} et ${SENSOR_MAX} cm` });
+    return;
+  }
+
+  if (process.env.DEMO_MODE === "true") {
+    res.status(201).json({ ...createDemoMeasurement(distance_cm), alerts: [] });
     return;
   }
 

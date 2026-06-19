@@ -19,7 +19,9 @@ Le timestamp N'EST PAS envoyé par la carte (elle n'a pas d'horloge temps réel)
 il est généré côté MySQL via `mesure_at DEFAULT CURRENT_TIMESTAMP`.
 
 Usage :
+    python lecture_serie.py
     python lecture_serie.py --port COM3
+    python lecture_serie.py --port /dev/cu.usbmodemXXXX
     python lecture_serie.py --port COM3 --baud 9600 --api http://localhost:3001/api/measurements
 
 Voir les ports disponibles :
@@ -67,7 +69,38 @@ def lister_ports() -> None:
         return
     print("Ports série disponibles :")
     for p in ports:
-        print(f"  • {p.device:<10} {p.description}")
+        hwid = f" ({p.hwid})" if p.hwid else ""
+        print(f"  • {p.device:<24} {p.description}{hwid}")
+
+
+def detecter_port() -> str | None:
+    """Choisit automatiquement le port le plus probable pour la TIVA."""
+    ports = list(list_ports.comports())
+    if not ports:
+        return None
+
+    keywords = (
+        "tiva",
+        "stellaris",
+        "icdi",
+        "launchpad",
+        "tm4c",
+        "usb serial",
+        "usb-serial",
+        "usbmodem",
+        "usbserial",
+    )
+
+    for p in ports:
+        haystack = " ".join([p.device, p.description or "", p.hwid or ""]).lower()
+        if any(k in haystack for k in keywords):
+            return p.device
+
+    # S'il n'y a qu'un seul port, il vaut mieux essayer celui-là que bloquer.
+    if len(ports) == 1:
+        return ports[0].device
+
+    return None
 
 
 def envoyer_mesure(api_url: str, distance_cm: float) -> bool:
@@ -146,7 +179,10 @@ def boucle_lecture(port: str, baud: int, api_url: str, debug: bool = False) -> N
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Bridge série TIVA C → API Capteur de Distance")
-    parser.add_argument("--port", help="Port série de la TIVA (ex. COM3 sous Windows)")
+    parser.add_argument(
+        "--port",
+        help="Port série de la TIVA (Windows: COM3, macOS: /dev/cu.usbmodem... ou /dev/cu.usbserial...)",
+    )
     parser.add_argument("--baud", type=int, default=DEFAULT_BAUD, help=f"Vitesse série (défaut {DEFAULT_BAUD})")
     parser.add_argument("--api", default=DEFAULT_API, help="URL de l'endpoint d'insertion")
     parser.add_argument("--list", action="store_true", help="Lister les ports série puis quitter")
@@ -157,12 +193,19 @@ def main() -> None:
         lister_ports()
         return
 
-    if not args.port:
-        print("❌  Argument --port requis (ex. --port COM3).\n")
+    port = args.port or detecter_port()
+    if not port:
+        print("❌  Aucun port série évident détecté.\n")
         lister_ports()
+        print("\nRelance avec le port affiché, par exemple :")
+        print("  python lecture_serie.py --port /dev/cu.usbmodemXXXX")
+        print("  python lecture_serie.py --port COM3")
         sys.exit(1)
 
-    boucle_lecture(args.port, args.baud, args.api, debug=args.debug)
+    if not args.port:
+        print(f"🔎  Port détecté automatiquement : {port}")
+
+    boucle_lecture(port, args.baud, args.api, debug=args.debug)
 
 
 if __name__ == "__main__":
