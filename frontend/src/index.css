@@ -225,7 +225,7 @@
 
 /* ── Accessibilité : respect de « réduire les animations » ──
    Désactive animations et transitions pour les utilisateurs sensibles
-   au mouvement (vestibulaire, migraines, TDAH…). */
+   au mouvement (vestibulaire, migraines, TDAH…). Système OU réglage manuel. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -235,4 +235,42 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+.a11y-no-motion *,
+.a11y-no-motion *::before,
+.a11y-no-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ── Accessibilité : contraste élevé (réglage manuel du widget) ── */
+.a11y-contrast {
+  --ink: #000000;
+  --ink-muted: #1c1a16;
+  --ink-faint: #2f2c25;
+  --line: #000000;
+  --paper: #ffffff;
+  --paper-raised: #ffffff;
+  --clay: #8f2f15;
+}
+.a11y-contrast body {
+  background-color: #ffffff;
+}
+.a11y-contrast .card,
+.a11y-contrast .btn-ink,
+.a11y-contrast .btn-line {
+  border-width: 2px;
+}
+
+/* ── Accessibilité : soulignement des liens (réglage manuel du widget) ── */
+.a11y-underline-links a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Ombre portée pour le widget flottant ── */
+.shadow-lg {
+  box-shadow: 0 10px 30px -8px rgba(33, 31, 27, 0.35);
 }
