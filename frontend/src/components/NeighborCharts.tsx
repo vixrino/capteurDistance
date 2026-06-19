@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { usePageVisible } from "@/hooks/usePageVisible";
 import api from "@/api/client";
-import { SoundPoint, LedPoint, LedDistribution, StatePoint } from "@/types";
+import { SoundPoint, LedPoint, LedDistribution, StatePoint, Measurement } from "@/types";
 import {
   ResponsiveContainer,
   AreaChart, Area,
@@ -9,25 +10,47 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
 
+const REFRESH_MS = 8000;
+
 /**
- * Graphiques des capteurs & actionneurs voisins lus dans la base partagée :
+ * Graphiques des capteurs & actionneurs lus dans la base partagée :
+ *  - Distance (notre capteur)       → distance (cm) dans le temps
  *  - Micro G8C (g8c_mesures)        → niveau sonore (dB) dans le temps
  *  - LED G8E  (g8e_led_control)     → répartition des couleurs commandées
  *  - État G8B (g8b_valeurs)         → transitions 0/1 dans le temps
+ *
+ * Rafraîchissement automatique toutes les REFRESH_MS, suspendu quand l'onglet
+ * est masqué (éco-conception).
  */
 export default function NeighborCharts() {
+  const [distance, setDistance] = useState<{ rows: Measurement[] } | null>(null);
   const [sound, setSound] = useState<{ rows: SoundPoint[]; demo: boolean } | null>(null);
   const [led, setLed] = useState<{ distribution: LedDistribution[]; rows: LedPoint[]; demo: boolean } | null>(null);
   const [state, setState] = useState<{ rows: StatePoint[]; demo: boolean } | null>(null);
+  const visible = usePageVisible();
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
+    api.get<{ data: Measurement[] }>("/measurements/history?limit=60").then(({ data }) => setDistance({ rows: data.data })).catch(() => {});
     api.get("/external/sound/history?limit=60").then(({ data }) => setSound(data)).catch(() => {});
     api.get("/external/led/history?limit=150").then(({ data }) => setLed(data)).catch(() => {});
     api.get("/external/state/history?limit=60").then(({ data }) => setState(data)).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!visible) return;
+    refresh();
+    const t = setInterval(refresh, REFRESH_MS);
+    return () => clearInterval(t);
+  }, [refresh, visible]);
+
   const fmtTime = (s: string | null) =>
     s ? new Date(s).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "—";
+
+  // L'historique distance arrive en ordre décroissant : on le remet chronologique.
+  const distanceData = [...(distance?.rows ?? [])].reverse().map((r) => ({
+    t: fmtTime(r.mesure_at),
+    distance_cm: r.distance_cm,
+  }));
 
   const soundData = (sound?.rows ?? []).map((r) => ({
     t: fmtTime(r.ts),
@@ -46,18 +69,51 @@ export default function NeighborCharts() {
   return (
     <section className="space-y-8">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-serif text-3xl text-ink">Capteurs & actionneurs voisins</h2>
-        <span className="eyebrow">Base partagée du hangar</span>
+        <h2 className="font-serif text-3xl text-ink">Capteurs & actionneurs</h2>
+        <span className="eyebrow">Mise à jour automatique</span>
       </div>
       <p className="text-sm text-ink-muted max-w-2xl -mt-2">
-        Données lues en direct dans la base commune : le micro du groupe 8C, la LED
-        RGB du groupe 8E et le capteur d'état du groupe 8B.
+        Notre capteur de distance et les données lues en direct dans la base
+        commune du hangar : le micro du groupe 8C, la LED RGB du groupe 8E et le
+        capteur d'état du groupe 8B.
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
+        {/* ── Notre capteur de distance ── */}
+        <div className="lg:col-span-12">
+          <div className="flex items-baseline justify-between mb-4">
+            <h3 className="font-serif text-xl text-ink">Capteur de distance · notre mesure</h3>
+            <span className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">
+              HC-SR04 · {distanceData.length} pts
+            </span>
+          </div>
+          {distanceData.length > 1 ? (
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={distanceData} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="distGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#b24a2e" stopOpacity={0.16} />
+                    <stop offset="100%" stopColor="#b24a2e" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="2 6" stroke="#d8d1c0" vertical={false} />
+                <XAxis dataKey="t" tick={{ fontSize: 10, fill: "#9c9685", fontFamily: "Hanken Grotesk, sans-serif" }} interval="preserveStartEnd" tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "#9c9685", fontFamily: "Hanken Grotesk, sans-serif" }} tickLine={false} axisLine={false} width={30} />
+                <Tooltip
+                  contentStyle={{ background: "#faf7f0", border: "1px solid #211f1b", fontFamily: "Hanken Grotesk, sans-serif", fontSize: 12, color: "#211f1b" }}
+                  formatter={(v: number) => [`${Number(v).toFixed(1)} cm`, "Distance"]}
+                />
+                <Area type="monotone" dataKey="distance_cm" stroke="#211f1b" strokeWidth={1.5} fill="url(#distGrad)" dot={false} isAnimationActive={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <ChartEmpty />
+          )}
+        </div>
+
         {/* ── Micro G8C : niveau sonore ── */}
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-7 lg:border-t lg:border-line lg:pt-8">
           <div className="flex items-baseline justify-between mb-4">
             <h3 className="font-serif text-xl text-ink">Micro · niveau sonore</h3>
             <span className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">
@@ -96,7 +152,7 @@ export default function NeighborCharts() {
         </div>
 
         {/* ── LED G8E : répartition des couleurs ── */}
-        <div className="lg:col-span-5 lg:border-l lg:border-line lg:pl-10">
+        <div className="lg:col-span-5 lg:border-t lg:border-l lg:border-line lg:pl-10 lg:pt-8">
           <div className="flex items-baseline justify-between mb-4">
             <h3 className="font-serif text-xl text-ink">LED · couleurs commandées</h3>
             <span className="text-[11px] tracking-[0.14em] uppercase text-ink-faint">
